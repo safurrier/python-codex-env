@@ -1,0 +1,9 @@
+providers:
+  openai_mini:
+    type: openai
+    options:
+      model: gpt-4o-mini
+  openai_big:
+    type: openai
+    options:
+      model: gpt-4o
