@@ -52,7 +52,7 @@ test: setup  # Run pytest with coverage
 	uv run -m pytest tests --cov=$(MODULE_NAME) --cov-report=term-missing
 
 mypy: setup  # Run type checking
-	uv run -m mypy $(MODULE_NAME)
+	uv run -m mypy $(MODULE_NAME)/auto_docs_bot
 
 lint: setup  # Run ruff linter with auto-fix
 	uv run -m ruff check --fix $(MODULE_NAME)

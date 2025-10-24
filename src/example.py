@@ -1,7 +1,6 @@
 import statistics
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
 
 
 @dataclass
@@ -10,7 +9,7 @@ class DataPoint:
 
     timestamp: datetime
     value: float
-    label: Optional[str] = None
+    label: str | None = None
 
 
 def calculate_moving_average(
