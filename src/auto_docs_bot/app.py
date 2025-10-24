@@ -8,6 +8,7 @@ from typing import Callable
 from fastapi import BackgroundTasks, FastAPI, Request
 
 from .agent_runner import AgentRunner
+from .agent_strategies import ClaudeCodeAgentStrategy
 from .baml_integration import build_doc_authoring_service
 from .github_app import GitHubApp
 from .github_client import GitHubAPI
@@ -39,7 +40,8 @@ def create_app(
     if agent_runner is None:
         LOGGER.info("Initialising DocAuthoringService via BAML client")
         doc_service = build_doc_authoring_service()
-        agent_runner = AgentRunner(doc_service)
+        strategy = ClaudeCodeAgentStrategy(authoring_service=doc_service)
+        agent_runner = AgentRunner(strategy)
     handler = WebhookHandler(
         settings=settings,
         github_app=github_app,

@@ -2,6 +2,13 @@
 
 from __future__ import annotations
 
+from .agent_runner import AgentRunner
+from .agent_strategies import (
+    AgentOutput,
+    AgentStrategy,
+    ClaudeCodeAgentStrategy,
+    CodexCliAgentStrategy,
+)
 from .commands import DocsCommand, DocsMode
 from .models import AgentJobPayload, DocPatch
 
@@ -16,6 +23,11 @@ def create_app(*args, **kwargs):  # type: ignore[override]
 
 __all__ = [
     "AgentJobPayload",
+    "AgentOutput",
+    "AgentRunner",
+    "AgentStrategy",
+    "ClaudeCodeAgentStrategy",
+    "CodexCliAgentStrategy",
     "DocPatch",
     "DocsCommand",
     "DocsMode",

@@ -8,8 +8,10 @@ from pathlib import Path
 import pytest
 
 from auto_docs_bot import DocsCommand, DocsMode
+from auto_docs_bot.agent_runner import AgentContext, AgentRunner
+from auto_docs_bot.agent_strategies import AgentOutput, CodexCliAgentStrategy
 from auto_docs_bot.models import AgentJobPayload, AgentJobResult, DocPatch, validate_patches
-from auto_docs_bot.repo_intel import RepoIntelBuilder
+from auto_docs_bot.repo_intel import RepoIntelBuilder, RepoInsights
 from auto_docs_bot.settings import Settings
 from auto_docs_bot.webhook import WebhookHandler
 
@@ -45,6 +47,7 @@ class FakeGitHubAPI:
         pass
 
     async def upsert_files(self, repo: str, branch: str, message: str, files):
+        self.commit_message = message
         self.last_commit = list(files)
 
     async def create_pull_request(self, repo: str, head: str, base: str, title: str, body: str) -> dict:
@@ -189,5 +192,93 @@ def test_issue_comment_no_changes_posts_noop() -> None:
         await handler._handle_issue_comment(payload, tasks)
         await tasks.run()
         assert any("no-op" in body for (_, _, body) in github.comments)
+
+    asyncio.run(run())
+
+
+class StubStrategy:
+    def __init__(self, output: AgentOutput) -> None:
+        self.output = output
+        self.calls: list = []
+
+    async def generate(self, job, context, insights):
+        self.calls.append((job, context, insights))
+        return self.output
+
+
+def test_agent_runner_uses_strategy_output() -> None:
+    async def run() -> None:
+        github = FakeGitHubAPI()
+        github.files = [{"filename": "src/app.py", "status": "modified", "patch": "@@"}]
+        job = AgentJobPayload(
+            repository="acme/repo",
+            pr_number=3,
+            installation_id=1,
+            comment_id=2,
+            mode=DocsMode.UPDATE,
+            notes="",
+        )
+        output = AgentOutput(
+            patches=[DocPatch(path=Path("docs/guide.md"), content="New content")],
+            pr_title="Custom title",
+            pr_body="Custom body",
+            commit_message="Custom commit",
+        )
+        strategy = StubStrategy(output)
+        runner = AgentRunner(strategy)
+        result = await runner.run(github, job)
+        assert result.branch.startswith("auto-docs/feature-")
+        assert github.commit_message == "Custom commit"
+        assert ("docs/guide.md", "New content") in github.last_commit
+        assert github.pr_body == "Custom body"
+        assert strategy.calls
+
+    asyncio.run(run())
+
+
+def test_codex_cli_strategy_parses_output(monkeypatch) -> None:
+    strategy = CodexCliAgentStrategy(cli_path="codex")
+    expected_response = {
+        "patches": [
+            {"path": "docs/guide.md", "content": "content", "rationale": "auto"},
+        ],
+        "pr_title": "CLI Title",
+        "pr_body": "CLI Body",
+        "commit_message": "CLI Commit",
+    }
+
+    import json
+    from types import SimpleNamespace
+
+    def fake_run(cmd, input, text, capture_output, check):
+        payload = json.loads(input)
+        assert payload["mode"] == DocsMode.QUICKSTART.value
+        return SimpleNamespace(stdout=json.dumps(expected_response))
+
+    monkeypatch.setattr("subprocess.run", fake_run)
+
+    job = AgentJobPayload(
+        repository="acme/repo",
+        pr_number=1,
+        installation_id=1,
+        comment_id=1,
+        mode=DocsMode.QUICKSTART,
+        notes="",
+    )
+    context = AgentContext(
+        repo="acme/repo",
+        pr_number=1,
+        head_ref="feature",
+        head_sha="abc123",
+        base_ref="main",
+        files=[],
+    )
+    insights = RepoInsights(repo_hints="", diff_snippets=[], findings=[])
+
+    async def run() -> None:
+        output = await strategy.generate(job, context, insights)
+        assert output.pr_title == "CLI Title"
+        assert output.commit_message == "CLI Commit"
+        assert output.patches and output.patches[0].path.as_posix() == "docs/guide.md"
 
     asyncio.run(run())
