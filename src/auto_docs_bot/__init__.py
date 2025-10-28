@@ -1,0 +1,27 @@
+"""Auto-docs bot package."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from fastapi import FastAPI
+
+from .commands import DocsCommand, DocsMode
+from .models import AgentJobPayload, DocPatch
+
+
+def create_app(*args: Any, **kwargs: Any) -> FastAPI:
+    """Lazy import for the FastAPI app factory."""
+
+    from .app import create_app as _create_app
+
+    return _create_app(*args, **kwargs)
+
+
+__all__ = [
+    "AgentJobPayload",
+    "DocPatch",
+    "DocsCommand",
+    "DocsMode",
+    "create_app",
+]

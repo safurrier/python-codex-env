@@ -11,6 +11,7 @@ A modern Python project template with best practices for development and collabo
 - 🧪 Testing with [pytest](https://github.com/pytest-dev/pytest)
 - 🐳 Docker support for development and deployment
 - 👷 CI/CD with GitHub Actions
+- 🤖 Automated documentation assistant powered by the Claude Agent SDK
 
 ## Python Version
 This template requires Python 3.9 or higher and defaults to Python 3.12. To use a different version:
@@ -136,3 +137,25 @@ make push-image     # Push to container registry
 
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
+# Auto-docs bot
+
+This template now ships with an opinionated documentation automation flow that can be
+installed as a GitHub App. When the app is installed on a repository:
+
+1. Label a pull request with `docs:auto` to enable automation hints.
+2. Comment with `/docs quickstart`, `/docs update`, or `/docs deep-update` (optionally
+   including notes) to trigger the assistant.
+3. The bot reacts with 👀, delegates to a pluggable agent strategy that performs a light
+   summarisation of the pull request files, proposes documentation updates, and pushes a
+   new branch prefixed with `auto-docs/`.
+4. A companion pull request is opened against the original base branch, the comment gets
+   a 🎉 reaction, and a link to the documentation PR is posted.
+
+The implementation lives under `src/auto_docs_bot/` and is intentionally light on
+configuration—behaviour is driven by environment variables such as `GITHUB_APP_ID`,
+`GITHUB_PRIVATE_KEY`, `CLAUDE_API_KEY`, and `BAML_ENV`. GitHub API access is handled via
+the [`githubkit`](https://github.com/yanyongyu/githubkit) client so authentication,
+reactions, branch management, and PR creation follow established best practices instead of
+custom request plumbing. The agent backend can be swapped by setting
+`AUTO_DOCS_AGENT_BACKEND` to `claude` (default) or `codex`; when using Codex you can
+override the CLI path via `CODEX_CLI_PATH`.
