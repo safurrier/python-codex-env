@@ -7,7 +7,7 @@ import logging
 import signal
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import yaml
 
@@ -86,6 +86,59 @@ def build_actuator(config: dict[str, Any]) -> WebOSActuator | CECActuator:
     raise ValueError(f"Unsupported actuator type: {actuator_type}")
 
 
+def run_pipeline(
+    ingestor: FFmpegAudioIngestor,
+    detector: StageADetector,
+    state_machine: StateMachine,
+    actuator: WebOSActuator | CECActuator,
+    *,
+    should_stop: Callable[[], bool] | None = None,
+    max_frames: int | None = None,
+) -> None:
+    """Drive the ingest/detect/actuate loop.
+
+    Parameters
+    ----------
+    ingestor:
+        Source of audio frames.
+    detector:
+        Frame classifier used to distinguish ads from content.
+    state_machine:
+        State tracker that interprets frame classifications.
+    actuator:
+        Control surface for the TV.
+    should_stop:
+        Optional callback that, when returning :data:`True`, stops the loop.
+    max_frames:
+        Optional safety limit on the number of frames to process.
+    """
+
+    processed = 0
+    try:
+        for frame in ingestor.stream_frames():
+            fc = detector.classify(frame)
+            transition = state_machine.update(fc)
+            if transition is not None:
+                if transition.event == TransitionEvent.AD_START:
+                    LOGGER.info("Detected ad block; muting TV")
+                    actuator.mute()
+                elif transition.event == TransitionEvent.CONTENT_START:
+                    LOGGER.info("Content resumed; unmuting TV")
+                    actuator.unmute()
+                elif transition.force_unmute:
+                    LOGGER.warning("Ad exceeded max duration; forcing unmute")
+                    actuator.unmute()
+            processed += 1
+            if max_frames is not None and processed >= max_frames:
+                break
+            if should_stop and should_stop():
+                break
+    finally:
+        close_method = getattr(actuator, "close", None)
+        if callable(close_method):
+            close_method()
+
+
 def run_once(config: dict[str, Any]) -> None:
     logging.basicConfig(level=config.get("log_level", "INFO"))
     ingestor = build_ingestor(config)
@@ -108,27 +161,13 @@ def run_once(config: dict[str, Any]) -> None:
     signal.signal(signal.SIGTERM, _handle_signal)
     signal.signal(signal.SIGINT, _handle_signal)
 
-    try:
-        for frame in ingestor.stream_frames():
-            fc = detector.classify(frame)
-            transition = state_machine.update(fc)
-            if transition is None:
-                continue
-            if transition.event == TransitionEvent.AD_START:
-                LOGGER.info("Detected ad block; muting TV")
-                actuator.mute()
-            elif transition.event == TransitionEvent.CONTENT_START:
-                LOGGER.info("Content resumed; unmuting TV")
-                actuator.unmute()
-            elif transition.force_unmute:
-                LOGGER.warning("Ad exceeded max duration; forcing unmute")
-                actuator.unmute()
-            if stop:
-                break
-    finally:
-        close_method = getattr(actuator, "close", None)
-        if callable(close_method):
-            close_method()
+    run_pipeline(
+        ingestor,
+        detector,
+        state_machine,
+        actuator,
+        should_stop=lambda: stop,
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
