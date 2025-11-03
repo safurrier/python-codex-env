@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import logging
 import subprocess
+import threading
 from collections import deque
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
+from typing import IO
 
 import numpy as np
 
@@ -52,6 +54,9 @@ class FFmpegAudioIngestor:
             stderr=subprocess.PIPE,
         )
         assert process.stdout is not None
+        stderr_thread = None
+        if process.stderr is not None:
+            stderr_thread = self._spawn_stderr_drain(process.stderr)
         try:
             while True:
                 chunk = process.stdout.read(self._frame_bytes)
@@ -69,6 +74,8 @@ class FFmpegAudioIngestor:
                 process.wait(timeout=2)
             except subprocess.TimeoutExpired:  # pragma: no cover - defensive
                 process.kill()
+            if stderr_thread is not None:
+                stderr_thread.join(timeout=1)
 
     def _build_command(self) -> list[str]:
         config = self._config
@@ -91,6 +98,20 @@ class FFmpegAudioIngestor:
         if config.extra_args:
             command.extend(config.extra_args)
         return command
+
+    def _spawn_stderr_drain(self, stream: IO[bytes]) -> threading.Thread:
+        """Drain stderr from the ffmpeg process to avoid deadlocks."""
+
+        def _drain() -> None:
+            with stream:
+                for raw_line in iter(stream.readline, b""):
+                    line = raw_line.decode("utf-8", errors="replace").rstrip()
+                    if line:
+                        LOGGER.debug("ffmpeg stderr: %s", line)
+
+        thread = threading.Thread(target=_drain, daemon=True)
+        thread.start()
+        return thread
 
 
 class RollingRMS:
