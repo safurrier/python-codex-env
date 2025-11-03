@@ -9,6 +9,7 @@ from dataclasses import dataclass
 import numpy as np
 import pytest
 
+from src.admute.control import ActuatorController
 from src.admute.detector import StageADetector
 from src.admute.runner import run_pipeline
 from src.admute.state_machine import StateMachine
@@ -67,12 +68,13 @@ def test_run_pipeline_mutes_and_unmutes_with_simulated_audio() -> None:
 
     ingestor = FakeIngestor(frames)
     actuator = RecordingActuator()
+    controller = ActuatorController(actuator)
 
     run_pipeline(
         ingestor,
         detector,
         state_machine,
-        actuator,
+        controller,
         max_frames=len(frames),
     )
 
@@ -91,13 +93,14 @@ def test_run_pipeline_force_unmute_when_ad_exceeds_limit(
 
     ingestor = FakeIngestor(frames)
     actuator = RecordingActuator()
+    controller = ActuatorController(actuator)
 
     with caplog.at_level(logging.WARNING):
         run_pipeline(
             ingestor,
             detector,
             state_machine,
-            actuator,
+            controller,
             max_frames=len(frames),
         )
 

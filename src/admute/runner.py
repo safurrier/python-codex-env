@@ -13,9 +13,11 @@ import yaml
 
 from .actuator_cec import CECActuator, CECConfig
 from .actuator_webos import WebOSActuator, WebOSConfig
+from .control import ActuatorController
 from .detector import DetectorConfig, StageADetector
 from .ingest import FFmpegAudioIngestor, IngestConfig
 from .state_machine import StateMachine, TransitionEvent
+from .web_app import WebAppConfig, WebAppServer
 
 LOGGER = logging.getLogger(__name__)
 
@@ -90,7 +92,7 @@ def run_pipeline(
     ingestor: FFmpegAudioIngestor,
     detector: StageADetector,
     state_machine: StateMachine,
-    actuator: WebOSActuator | CECActuator,
+    controller: ActuatorController,
     *,
     should_stop: Callable[[], bool] | None = None,
     max_frames: int | None = None,
@@ -120,23 +122,33 @@ def run_pipeline(
             transition = state_machine.update(fc)
             if transition is not None:
                 if transition.event == TransitionEvent.AD_START:
-                    LOGGER.info("Detected ad block; muting TV")
-                    actuator.mute()
+                    issued = controller.mute(
+                        reason="detector_ad_start",
+                        origin="detector",
+                    )
+                    if issued:
+                        LOGGER.info("Detected ad block; muting TV")
                 elif transition.event == TransitionEvent.CONTENT_START:
-                    LOGGER.info("Content resumed; unmuting TV")
-                    actuator.unmute()
+                    issued = controller.unmute(
+                        reason="detector_content_start",
+                        origin="detector",
+                    )
+                    if issued:
+                        LOGGER.info("Content resumed; unmuting TV")
                 elif transition.force_unmute:
                     LOGGER.warning("Ad exceeded max duration; forcing unmute")
-                    actuator.unmute()
+                    controller.unmute(
+                        reason="detector_force_unmute",
+                        origin="detector",
+                        force=True,
+                    )
             processed += 1
             if max_frames is not None and processed >= max_frames:
                 break
             if should_stop and should_stop():
                 break
     finally:
-        close_method = getattr(actuator, "close", None)
-        if callable(close_method):
-            close_method()
+        controller.close()
 
 
 def run_once(config: dict[str, Any]) -> None:
@@ -150,6 +162,25 @@ def run_once(config: dict[str, Any]) -> None:
         frame_seconds=config.get("frame_seconds", 1.0),
     )
     actuator = build_actuator(config)
+    controller = ActuatorController(actuator)
+
+    web_app: WebAppServer | None = None
+    web_app_config = config.get("web_app")
+    if isinstance(web_app_config, dict):
+        app_config = WebAppConfig(
+            host=web_app_config.get("host", "127.0.0.1"),
+            port=int(web_app_config.get("port", 8765)),
+            title=web_app_config.get("title", "AdMute Control"),
+        )
+        web_app = WebAppServer(controller, app_config)
+        web_app.start()
+    elif web_app_config:
+        if isinstance(web_app_config, bool):
+            app_config = WebAppConfig()
+        else:
+            raise ValueError("web_app configuration must be a mapping or boolean")
+        web_app = WebAppServer(controller, app_config)
+        web_app.start()
 
     stop = False
 
@@ -161,13 +192,17 @@ def run_once(config: dict[str, Any]) -> None:
     signal.signal(signal.SIGTERM, _handle_signal)
     signal.signal(signal.SIGINT, _handle_signal)
 
-    run_pipeline(
-        ingestor,
-        detector,
-        state_machine,
-        actuator,
-        should_stop=lambda: stop,
-    )
+    try:
+        run_pipeline(
+            ingestor,
+            detector,
+            state_machine,
+            controller,
+            should_stop=lambda: stop,
+        )
+    finally:
+        if web_app is not None:
+            web_app.stop()
 
 
 def main(argv: list[str] | None = None) -> int:

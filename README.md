@@ -151,6 +151,13 @@ The AdMute service monitors HDMI audio from a Roku 4K player and automatically m
 4. Test HDMI-CEC fallback commands manually: `echo "volumedown" | cec-client -s -d 1`.
 5. Run the service: `python -m admute.runner --config /etc/admute.yaml`.
 
+### Manual Web Controls (FastHtml)
+
+Set the `web_app` section in `admute.yaml` to expose a lightweight FastHtml interface for manual mute toggles. By default the
+app listens on `http://<host>:8765/` and shows the current mute state, last action, and command counter. The interface provides
+"Mute", "Unmute", and "Toggle" buttons that call the same actuator controller used by the detector pipeline, so manual actions
+stay in sync with automatic state transitions.
+
 ### Systemd Unit Example
 
 ```
