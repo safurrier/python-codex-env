@@ -100,7 +100,7 @@ class _ControlRequestHandler(BaseHTTPRequestHandler):
     controller: ActuatorController
     config: WebAppConfig
 
-    def do_GET(self) -> None:
+    def do_GET(self) -> None:  # noqa: N802
         status = self.controller.snapshot()
         page = _render_page(self.config, status)
         body_bytes = page.encode("utf-8")
@@ -110,7 +110,7 @@ class _ControlRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body_bytes)
 
-    def do_POST(self) -> None:
+    def do_POST(self) -> None:  # noqa: N802
         length = int(self.headers.get("Content-Length", 0))
         body_bytes = self.rfile.read(length)
         params = parse_qs(body_bytes.decode("utf-8"))
