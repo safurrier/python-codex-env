@@ -6,11 +6,12 @@ import http.client
 import time
 from urllib.parse import urlparse
 
+from src.admute.actuator_base import MuteActuator
 from src.admute.control import ActuatorController
 from src.admute.web_app import WebAppConfig, WebAppServer
 
 
-class DummyActuator:
+class DummyActuator(MuteActuator):
     def __init__(self) -> None:
         self.commands: list[str] = []
 

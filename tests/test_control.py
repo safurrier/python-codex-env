@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from src.admute.actuator_base import MuteActuator
 from src.admute.control import ActuatorController
 
 
-class DummyActuator:
+class DummyActuator(MuteActuator):
     def __init__(self) -> None:
         self.commands: list[str] = []
 

@@ -11,6 +11,7 @@ from typing import Any, Callable
 
 import yaml
 
+from .actuator_base import MuteActuator
 from .actuator_cec import CECActuator, CECConfig
 from .actuator_webos import WebOSActuator, WebOSConfig
 from .control import ActuatorController
@@ -65,7 +66,7 @@ def build_detector(config: dict[str, Any]) -> StageADetector:
     return StageADetector(detector_cfg)
 
 
-def build_actuator(config: dict[str, Any]) -> WebOSActuator | CECActuator:
+def build_actuator(config: dict[str, Any]) -> MuteActuator:
     actuator_config = config.get("actuator", {})
     actuator_type = actuator_config.get("type", "webos")
     if actuator_type == "webos":

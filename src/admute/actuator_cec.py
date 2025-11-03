@@ -7,6 +7,8 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Protocol
 
+from .actuator_base import MuteActuator
+
 
 class SubprocessRunner(Protocol):
     """Minimal protocol for running subprocess commands."""
@@ -25,7 +27,7 @@ class CECConfig:
     volume_step_count: int = 20
 
 
-class CECActuator:
+class CECActuator(MuteActuator):
     """Send mute/unmute using HDMI-CEC volume commands."""
 
     def __init__(

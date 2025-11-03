@@ -4,17 +4,8 @@ from __future__ import annotations
 import threading
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Protocol
 
-
-class SupportsMute(Protocol):
-    """Minimal protocol for actuators that can mute and unmute."""
-
-    def mute(self) -> None:  # pragma: no cover - protocol definition
-        ...
-
-    def unmute(self) -> None:  # pragma: no cover - protocol definition
-        ...
+from .actuator_base import MuteActuator
 
 
 @dataclass(frozen=True)
@@ -31,7 +22,7 @@ class ActuatorStatus:
 class ActuatorController:
     """Wrap an actuator and track the most recent command issued."""
 
-    def __init__(self, actuator: SupportsMute) -> None:
+    def __init__(self, actuator: MuteActuator) -> None:
         self._actuator = actuator
         self._lock = threading.Lock()
         self._status = ActuatorStatus(

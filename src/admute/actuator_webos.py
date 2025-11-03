@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Protocol, cast
 
+from .actuator_base import ActuatorError, MuteActuator
 from .state_machine import Transition, TransitionEvent
 
 
@@ -27,7 +28,7 @@ class WebSocketClientProtocol(Protocol):
 WebSocketFactory = Callable[[str, ssl.SSLContext], WebSocketClientProtocol]
 
 
-class WebOSActuatorError(RuntimeError):
+class WebOSActuatorError(ActuatorError):
     """Raised when the actuator fails to communicate with the TV."""
 
 
@@ -41,7 +42,7 @@ class WebOSConfig:
     port: int = 3001
 
 
-class WebOSActuator:
+class WebOSActuator(MuteActuator):
     """Send mute/unmute commands to an LG webOS TV."""
 
     def __init__(

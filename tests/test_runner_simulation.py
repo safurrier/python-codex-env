@@ -9,6 +9,7 @@ from dataclasses import dataclass
 import numpy as np
 import pytest
 
+from src.admute.actuator_base import MuteActuator
 from src.admute.control import ActuatorController
 from src.admute.detector import StageADetector
 from src.admute.runner import run_pipeline
@@ -25,7 +26,7 @@ class FakeIngestor:
         yield from self.frames
 
 
-class RecordingActuator:
+class RecordingActuator(MuteActuator):
     """Actuator implementation that records issued commands."""
 
     def __init__(self) -> None:
