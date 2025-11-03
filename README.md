@@ -136,3 +136,46 @@ make push-image     # Push to container registry
 
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## AdMute Service Overview
+
+The AdMute service monitors HDMI audio from a Roku 4K player and automatically mutes an LG OLED B2 when advertisements start.
+
+### Getting Started
+
+1. Configure audio capture using an HDMI splitter and USB capture interface. Verify the Linux host sees the device (e.g. `/dev/video0` or `hw:1,0`).
+2. Copy `configs/local.yaml` to `/etc/admute.yaml` and update the `capture_device` and actuator settings for your environment.
+3. Pair with the LG TV:
+   - Ensure SimpLink (HDMI-CEC) is enabled: `Settings → General → Devices → HDMI Settings → SimpLink (CEC) → On`.
+   - For webOS control, run the service once; accept the pairing prompt on the TV to store the client key.
+4. Test HDMI-CEC fallback commands manually: `echo "volumedown" | cec-client -s -d 1`.
+5. Run the service: `python -m admute.runner --config /etc/admute.yaml`.
+
+### Manual Web Controls (FastHtml)
+
+Set the `web_app` section in `admute.yaml` to expose a lightweight FastHtml interface for manual mute toggles. By default the
+app listens on `http://<host>:8765/` and shows the current mute state, last action, and command counter. The interface provides
+"Mute", "Unmute", and "Toggle" buttons that call the same actuator controller used by the detector pipeline, so manual actions
+stay in sync with automatic state transitions.
+
+### Systemd Unit Example
+
+```
+[Unit]
+Description=AdMute service
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/python -m admute.runner --config /etc/admute.yaml
+Restart=always
+User=admute
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Troubleshooting
+
+- If the TV updates to webOS 25 and refuses TLS, set `secure: false` in the actuator configuration to skip certificate validation.
+- When the HDMI capture exposes video but no audio, force the input format with `input_format: v4l2` (or `alsa`).
+- To retune detector thresholds, record ad segments in `scratch/detector_spikes.ipynb` and adjust the YAML settings.

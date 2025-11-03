@@ -1,0 +1,19 @@
+# Sample configuration for the AdMute runner.
+capture_device: /dev/video0
+ffmpeg_path: ffmpeg
+channels: 1
+sample_rate: 16000
+frame_seconds: 1.0
+ad_max_seconds: 240
+ad_like_threshold: 3
+content_like_threshold: 2
+actuator:
+  type: webos
+  host: 192.168.1.42
+  client_key: /var/lib/admute/lg_client_key.json
+  secure: true
+  port: 3001
+web_app:
+  host: 0.0.0.0
+  port: 8765
+  title: AdMute Control
