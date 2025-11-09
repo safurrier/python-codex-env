@@ -11,6 +11,7 @@ A modern Python project template with best practices for development and collabo
 - 🧪 Testing with [pytest](https://github.com/pytest-dev/pytest)
 - 🐳 Docker support for development and deployment
 - 👷 CI/CD with GitHub Actions
+- 📊 Production-ready BigQuery CLI built with [Click](https://click.palletsprojects.com/)
 
 ## Python Version
 This template requires Python 3.9 or higher and defaults to Python 3.12. To use a different version:
@@ -64,6 +65,76 @@ make check
 # Optional: Remove example code to start fresh
 make clean-example
 ```
+
+## BigQuery Utility CLI
+
+The repository now ships with a fully fledged BigQuery helper named `bq-util`.
+It wraps the Google Cloud BigQuery APIs with an ergonomic Click interface for
+analysing historical jobs, executing SQL files, and managing local defaults.
+
+### Installation
+
+Install the project in editable mode with the `cli` optional dependency group:
+
+```bash
+uv pip install -e .[cli]
+# or using pip
+pip install -e .[cli]
+```
+
+This pulls in `google-cloud-bigquery`, `pandas`, `InquirerPy`, and other
+required libraries. The base installation already depends on `click` and
+`rich`, so the CLI can still be imported without the optional extras (the
+commands will raise informative errors if BigQuery dependencies are missing).
+
+### Configuration
+
+`bq-util` persists configuration in the XDG config directory
+(`~/.config/bq_util/config.json` by default). Manage it from the command line:
+
+```bash
+bq-util config --show          # Display current configuration
+bq-util config --set-project my-project-id
+bq-util config --reset
+```
+
+The CLI automatically tracks the last executed job so you can re-run analysis
+with `bq-util analyze --last`.
+
+### Analysing Jobs
+
+The `analyze` command fetches detailed execution statistics, query plans, and
+human-friendly summaries:
+
+```bash
+# Interactive project and job selection
+bq-util analyze
+
+# Analyse a specific job
+bq-util analyze my-project:job_abc123
+
+# Export JSON for downstream processing
+bq-util analyze --last --format json
+```
+
+Verbose mode adds query-plan-to-SQL mapping hints, while `--llm` emits a
+machine-friendly summary for further processing.
+
+### Executing Queries
+
+Run SQL files against BigQuery directly from the CLI. The command captures job
+statistics, previews the results, and optionally triggers an immediate
+analysis:
+
+```bash
+bq-util query path/to/query.sql --project my-project --analyze
+
+# Save results to Parquet and remember the project for future runs
+bq-util query query.sql --output results.parquet --set-default-project
+```
+
+Queries that use dbt `ref()` macros are automatically rewritten to fully
+qualified table references for ad-hoc execution.
 
 ## Development Commands
 

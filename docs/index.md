@@ -9,6 +9,7 @@ This template provides everything you need for a professional Python project:
 - 🔧 **Modern Tooling**: UV package manager, Ruff formatting/linting, MyPy type checking
 - 🧪 **Testing**: pytest with coverage reporting and CI integration
 - 📚 **Documentation**: Optional MkDocs + Material theme with auto-generation
+- 🧰 **BigQuery CLI**: Production-ready Click application with job analysis tools
 - 🚀 **CI/CD**: GitHub Actions with quality checks and automated deployment
 - 🐳 **Development**: Docker support and pre-commit hooks
 - 📦 **Packaging**: Modern pyproject.toml configuration with hatchling
