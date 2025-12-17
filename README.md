@@ -7,7 +7,7 @@ A modern Python project template with best practices for development and collabo
 ## Features
 - 🚀 Fast dependency management with [uv](https://github.com/astral-sh/uv)
 - ✨ Code formatting with [ruff](https://github.com/astral-sh/ruff)
-- 🔍 Type checking with [mypy](https://github.com/python/mypy)
+- 🔍 Type checking with [ty](https://astral.sh/blog/ty)
 - 🧪 Testing with [pytest](https://github.com/pytest-dev/pytest)
 - 🐳 Docker support for development and deployment
 - 👷 CI/CD with GitHub Actions
@@ -48,7 +48,7 @@ This will:
 - Configure pre-commit hooks (optional, enabled by default)
 
 Pre-commit hooks will automatically run these checks before each commit:
-- Type checking (mypy)
+- Type checking (ty)
 - Linting (ruff)
 - Formatting (ruff)
 - Tests (pytest)
@@ -69,9 +69,9 @@ make clean-example
 
 ### Quality Checks
 ```bash
-make check      # Run all checks (test, mypy, lint, format)
+make check      # Run all checks (test, ty, lint, format)
 make test       # Run tests with coverage
-make mypy       # Run type checking
+make ty         # Run type checking
 make lint       # Run linter
 make format     # Run code formatter
 ```

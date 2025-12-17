@@ -11,14 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Integration with uv for dependency management
 - Modern Python development tools:
   - ruff for linting and formatting
-  - mypy for type checking
+  - ty for type checking
   - pytest with coverage reporting
 - GitHub Actions workflow for automated testing
 - Docker development environment improvements
 
 ### Changed
 - Switched from pip/venv to uv for environment management
-- Updated example code to pass mypy type checking
+- Updated example code to pass ty type checking
 - Modernized project structure and development workflow
 - Updated Python version to 3.12
 
@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Outdated Docker configuration elements
 
 ### Fixed
-- Type hints in example code to pass mypy checks
+- Type hints in example code to pass ty checks
 - Docker environment management
 - Development workflow and quality checks
 

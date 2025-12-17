@@ -1,4 +1,4 @@
-.PHONY: compile-deps setup clean-pyc clean-test clean-venv clean test mypy lint format check clean-example docs-install docs-build docs-serve docs-check docs-clean dev-env refresh-containers rebuild-images build-image push-image
+.PHONY: compile-deps setup clean-pyc clean-test clean-venv clean test ty lint format check clean-example docs-install docs-build docs-serve docs-check docs-clean dev-env refresh-containers rebuild-images build-image push-image
 
 # Module name - will be updated by init script
 MODULE_NAME := src
@@ -51,8 +51,8 @@ clean: clean-pyc clean-test clean-venv
 test: setup  # Run pytest with coverage
 	uv run -m pytest tests --cov=$(MODULE_NAME) --cov-report=term-missing
 
-mypy: setup  # Run type checking
-	uv run -m mypy $(MODULE_NAME)
+ty: setup  # Run type checking
+	uv run ty check $(MODULE_NAME)
 
 lint: setup  # Run ruff linter with auto-fix
 	uv run -m ruff check --fix $(MODULE_NAME)
@@ -60,7 +60,7 @@ lint: setup  # Run ruff linter with auto-fix
 format: setup  # Run ruff formatter
 	uv run -m ruff format $(MODULE_NAME)
 
-check: setup lint format test mypy  # Run all quality checks
+check: setup lint format test ty  # Run all quality checks
 
 # Documentation
 ###############
