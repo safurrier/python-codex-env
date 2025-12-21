@@ -356,7 +356,8 @@ export class InteractionSystem {
   }
 
   public updateAnimations(items: GameItem[], interactions: Interaction[]): GameItem[] {
-    const updatedItems = [...items];
+    let hasChanges = false;
+    const updatedItems = items.map(item => item);
 
     for (const interaction of interactions) {
       for (const itemId of interaction.participants) {
@@ -366,16 +367,23 @@ export class InteractionSystem {
 
           // Update animation state based on interaction type
           const newState = this.getAnimationForInteraction(interaction.type, personItem.type);
-          updatedItems[itemIndex] = {
-            ...personItem,
-            animationState: newState,
-            interactionTarget: interaction.participants.find(id => id !== itemId),
-          };
+          const newTarget = interaction.participants.find(id => id !== itemId);
+
+          // Only update if animation state or target actually changed
+          if (personItem.animationState !== newState || personItem.interactionTarget !== newTarget) {
+            hasChanges = true;
+            updatedItems[itemIndex] = {
+              ...personItem,
+              animationState: newState,
+              interactionTarget: newTarget,
+            };
+          }
         }
       }
     }
 
-    return updatedItems;
+    // Only return a new array if something actually changed
+    return hasChanges ? updatedItems : items;
   }
 
   private getAnimationForInteraction(interactionType: InteractionType, personType: PersonType): AnimationState {

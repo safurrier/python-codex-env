@@ -89,4 +89,60 @@ describe('InteractionSystem', () => {
     const distance = system.calculateDistance(pos1, pos2);
     expect(distance).toBe(5);
   });
+
+  it('should return same array reference when no animations change', () => {
+    const items: GameItem[] = [
+      {
+        id: 'parent1',
+        category: ItemCategory.PEOPLE,
+        type: PersonType.PARENT,
+        position: { x: 100, y: 100 },
+        zIndex: 1,
+        animationState: AnimationState.TALKING,
+        interactionTarget: 'child1',
+      },
+    ];
+
+    const interactions = [
+      {
+        id: 'int1',
+        participants: ['parent1', 'child1'],
+        type: 'parent_child' as const,
+        energyValue: 15,
+        isActive: true,
+      },
+    ];
+
+    // updateAnimations should return the same reference if animation already matches
+    const result = system.updateAnimations(items, interactions);
+    expect(result).toBe(items); // Same reference
+  });
+
+  it('should return new array reference when animations change', () => {
+    const items: GameItem[] = [
+      {
+        id: 'parent1',
+        category: ItemCategory.PEOPLE,
+        type: PersonType.PARENT,
+        position: { x: 100, y: 100 },
+        zIndex: 1,
+        animationState: AnimationState.IDLE,
+      },
+    ];
+
+    const interactions = [
+      {
+        id: 'int1',
+        participants: ['parent1', 'child1'],
+        type: 'parent_child' as const,
+        energyValue: 15,
+        isActive: true,
+      },
+    ];
+
+    // updateAnimations should return a new reference if animation changes
+    const result = system.updateAnimations(items, interactions);
+    expect(result).not.toBe(items); // Different reference
+    expect(result[0].animationState).toBe(AnimationState.TALKING);
+  });
 });
