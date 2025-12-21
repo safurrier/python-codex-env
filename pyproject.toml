@@ -7,7 +7,9 @@ authors = [
 ]
 requires-python = ">= 3.9"
 readme = "README.md"
-dependencies = []  # No runtime dependencies needed for example
+dependencies = [
+    "flask>=3.0.0",
+]
 
 [project.optional-dependencies]
 dev = [
