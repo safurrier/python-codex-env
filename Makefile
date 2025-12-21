@@ -230,6 +230,17 @@ clean-example:  # Remove example code (use this to start your own project)
 init: setup  # Initialize a new project
 	uv run python scripts/init_project.py
 
+# Game Commands
+###############
+run-game: setup  # Run the button game web app
+	@echo "🎮 Starting 'The Button Must Be Clicked' game..."
+	@echo "🌐 Game will be available at http://localhost:5000"
+	@echo "Press Ctrl+C to stop the server"
+	@echo ""
+	uv run python src/app.py
+
+game: run-game  # Alias for run-game
+
 # Container Engine Support
 ########################
 # Auto-detect container engine (podman or docker)
