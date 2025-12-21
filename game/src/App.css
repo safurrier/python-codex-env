@@ -1,0 +1,51 @@
+.app {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.room-container {
+  flex: 1;
+  margin-left: 300px;
+  position: relative;
+}
+
+.endgame-message {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity 2s ease-in-out;
+}
+
+.endgame-content {
+  text-align: center;
+  color: #FFD700;
+  padding: 40px;
+  background: rgba(139, 0, 0, 0.3);
+  border-radius: 20px;
+  border: 3px solid #FFD700;
+  max-width: 600px;
+}
+
+.endgame-content h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+  animation: glow 2s ease-in-out infinite;
+}
+
+.endgame-content p {
+  font-size: 24px;
+  margin: 15px 0;
+  line-height: 1.5;
+  color: #FFF;
+}

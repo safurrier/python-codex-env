@@ -1,4 +1,4 @@
-.PHONY: compile-deps setup clean-pyc clean-test clean-venv clean test ty lint format check clean-example docs-install docs-build docs-serve docs-check docs-clean dev-env refresh-containers rebuild-images build-image push-image
+.PHONY: compile-deps setup clean-pyc clean-test clean-venv clean test ty lint format check clean-example docs-install docs-build docs-serve docs-check docs-clean game game-install game-dev game-build game-lint game-test game-check game-clean dev-env refresh-containers rebuild-images build-image push-image
 
 # Module name - will be updated by init script
 MODULE_NAME := src
@@ -220,6 +220,59 @@ docs-clean:  ## Clean documentation build files
 	rm -rf site/
 	rm -rf .cache/
 	@echo "Documentation cleaned"
+
+# Christmas Morning Game
+########################
+GAME_DIR := game
+GAME_PORT ?= 3000
+
+ensure-node:  # Check if node/npm is installed
+	@which node > /dev/null || (echo "Error: Node.js is not installed. Please install Node.js 18+ from https://nodejs.org/" && exit 1)
+	@which npm > /dev/null || (echo "Error: npm is not installed. Please install npm from https://nodejs.org/" && exit 1)
+	@echo "✓ Node.js and npm are installed"
+
+game-install: ensure-node  ## Install game dependencies
+	@echo "Installing game dependencies..."
+	cd $(GAME_DIR) && npm install
+	@echo "✓ Game dependencies installed"
+
+game-dev: game-install  ## Run game in development mode
+	@echo "Starting game development server..."
+	@echo "🎮 Game will be available at http://localhost:$(GAME_PORT)"
+	@echo "🎄 Building Christmas Morning..."
+	@echo ""
+	cd $(GAME_DIR) && npm run dev
+
+game-build: game-install  ## Build game for production
+	@echo "Building game for production..."
+	cd $(GAME_DIR) && npm run build
+	@echo "✓ Game built successfully"
+
+game-lint: game-install  ## Lint game code
+	@echo "Linting game code..."
+	cd $(GAME_DIR) && npm run lint
+	@echo "✓ Game linting complete"
+
+game-test: game-install  ## Run game tests
+	@echo "Running game tests..."
+	cd $(GAME_DIR) && npm run test
+	@echo "✓ Game tests complete"
+
+game-type-check: game-install  ## Type check game code
+	@echo "Type checking game code..."
+	cd $(GAME_DIR) && npm run type-check
+	@echo "✓ Type checking complete"
+
+game-check: game-install game-lint game-type-check game-test  ## Run all game quality checks
+	@echo "✓ All game quality checks passed"
+
+game-clean:  ## Clean game build artifacts
+	@echo "Cleaning game build artifacts..."
+	rm -rf $(GAME_DIR)/dist
+	rm -rf $(GAME_DIR)/node_modules
+	@echo "✓ Game cleaned"
+
+game: game-dev  ## Build and run the Christmas Morning game (alias for game-dev)
 
 # Project Management
 ##################
