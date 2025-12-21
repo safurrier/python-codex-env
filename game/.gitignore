@@ -21,6 +21,8 @@ Thumbs.db
 # Testing
 coverage/
 .vitest/
+playwright-report/
+test-results/
 
 # Misc
 *.log
