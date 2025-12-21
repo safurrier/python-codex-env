@@ -41,22 +41,39 @@ const App: React.FC = () => {
   const triggerEndgame = useCallback(() => {
     setGameState(prev => ({ ...prev, endgameTriggered: true }));
 
-    // Show endgame message
+    // Show endgame message with enhanced sequence
     const message = document.createElement('div');
     message.className = 'endgame-message';
     message.innerHTML = `
       <div class="endgame-content">
         <h1>✨ Christmas Magic Achieved ✨</h1>
-        <p>You've discovered the true spirit of Christmas morning.</p>
-        <p>It's not about what you have, but the connections you create.</p>
+        <p class="endgame-reveal">You've built your perfect Christmas morning.</p>
+        <p class="endgame-teaching">The magic wasn't in the gifts or decorations...</p>
+        <p class="endgame-truth">It was in the connections you created.</p>
+        <p class="endgame-final">This moment. This is what you'll remember.</p>
+        <div class="endgame-stats">
+          <div>Items placed: ${gameState.items.length}</div>
+          <div>Connections made: ${gameState.interactions.length}</div>
+          <div>Energy reached: 100%</div>
+        </div>
       </div>
     `;
     document.body.appendChild(message);
 
+    // Fade in with staggered text
     setTimeout(() => {
       message.style.opacity = '1';
     }, 100);
-  }, []);
+
+    // Add zoom-out effect to room
+    const room = document.querySelector('.room') as HTMLElement;
+    if (room) {
+      setTimeout(() => {
+        room.style.transform = 'scale(0.95)';
+        room.style.filter = 'brightness(1.1) saturate(1.2)';
+      }, 2000);
+    }
+  }, [gameState.items.length, gameState.interactions.length]);
 
   // Update interactions and energy whenever items change
   useEffect(() => {
@@ -65,12 +82,18 @@ const App: React.FC = () => {
     const energyLevel = energySystem.getEnergyLevel(energy);
     const updatedItems = interactionSystem.updateAnimations(gameState.items, interactions);
 
+    // Update time of day based on energy
+    let timeOfDay = TimeOfDay.DAWN;
+    if (energy >= 30) timeOfDay = TimeOfDay.MORNING;
+    if (energy >= 70) timeOfDay = TimeOfDay.AFTERNOON;
+
     setGameState(prev => ({
       ...prev,
       items: updatedItems,
       interactions,
       connectionEnergy: energy,
       energyLevel,
+      timeOfDay,
     }));
 
     // Trigger endgame at 100% energy
@@ -151,6 +174,26 @@ const App: React.FC = () => {
     setGameState(prev => {
       const updatedItems = prev.items.map(item => {
         if (item.id !== itemId) return item;
+
+        // Handle click on people - they wave/smile
+        if (item.category === ItemCategory.PEOPLE) {
+          const personItem = item as PersonItem;
+          const newState = { ...personItem, animationState: AnimationState.HAPPY } as PersonItem;
+
+          // Reset animation after 2 seconds
+          setTimeout(() => {
+            setGameState(current => ({
+              ...current,
+              items: current.items.map(i =>
+                i.id === itemId && i.category === ItemCategory.PEOPLE
+                  ? { ...i, animationState: AnimationState.IDLE } as PersonItem
+                  : i
+              ),
+            }));
+          }, 2000);
+
+          return newState;
+        }
 
         // Handle different click interactions
         if (item.category === ItemCategory.GIFTS) {

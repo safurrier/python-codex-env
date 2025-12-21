@@ -272,6 +272,21 @@ export class InteractionSystem {
           { type: EffectType.GLOW, intensity: 0.95 },
         ],
       },
+      // Easter Egg: Christmas Chaos - peace within chaos
+      {
+        type: InteractionType.CHRISTMAS_CHAOS,
+        requiredItems: [
+          { category: ItemCategory.PEOPLE, minCount: 4 },
+          { category: ItemCategory.GIFTS, minCount: 6 },
+          { category: ItemCategory.DECORATIONS, minCount: 5 },
+          { type: DecorationType.CANDLE, minCount: 1, maxDistance: 500 },
+        ],
+        energyValue: 35,
+        effects: [
+          { type: EffectType.SACRED_FEELING, intensity: 0.9, duration: 5000 },
+          { type: EffectType.GLOW, intensity: 0.8 },
+        ],
+      },
     ];
   }
 
