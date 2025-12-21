@@ -1,4 +1,4 @@
-.PHONY: compile-deps setup clean-pyc clean-test clean-venv clean test ty lint format check clean-example docs-install docs-build docs-serve docs-check docs-clean game game-install game-dev game-build game-lint game-test game-check game-clean dev-env refresh-containers rebuild-images build-image push-image
+.PHONY: compile-deps setup clean-pyc clean-test clean-venv clean test ty lint format check clean-example docs-install docs-build docs-serve docs-check docs-clean game game-install game-dev game-build game-lint game-test game-test-e2e game-type-check game-check game-clean ensure-node ensure-playwright dev-env refresh-containers rebuild-images build-image push-image
 
 # Module name - will be updated by init script
 MODULE_NAME := src
@@ -225,15 +225,46 @@ docs-clean:  ## Clean documentation build files
 ########################
 GAME_DIR := game
 GAME_PORT ?= 3000
+NODE_VERSION ?= 20
 
-ensure-node:  # Check if node/npm is installed
-	@which node > /dev/null || (echo "Error: Node.js is not installed. Please install Node.js 18+ from https://nodejs.org/" && exit 1)
-	@which npm > /dev/null || (echo "Error: npm is not installed. Please install npm from https://nodejs.org/" && exit 1)
-	@echo "✓ Node.js and npm are installed"
+ensure-node:  # Check if node/npm is installed, auto-install if missing
+	@if ! which node > /dev/null 2>&1; then \
+		echo "Node.js not found. Installing Node.js $(NODE_VERSION) via nvm..."; \
+		if [ ! -d "$$HOME/.nvm" ]; then \
+			echo "Installing nvm (Node Version Manager)..."; \
+			curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash; \
+			export NVM_DIR="$$HOME/.nvm"; \
+			[ -s "$$NVM_DIR/nvm.sh" ] && . "$$NVM_DIR/nvm.sh"; \
+		else \
+			export NVM_DIR="$$HOME/.nvm"; \
+			[ -s "$$NVM_DIR/nvm.sh" ] && . "$$NVM_DIR/nvm.sh"; \
+		fi; \
+		nvm install $(NODE_VERSION); \
+		nvm use $(NODE_VERSION); \
+		nvm alias default $(NODE_VERSION); \
+		echo "✅ Node.js $(NODE_VERSION) installed successfully"; \
+	else \
+		NODE_CURRENT=$$(node --version | cut -d'v' -f2 | cut -d'.' -f1); \
+		if [ $$NODE_CURRENT -lt 18 ]; then \
+			echo "⚠️  Node.js version $$NODE_CURRENT detected. Node 18+ required."; \
+			echo "Upgrading to Node.js $(NODE_VERSION)..."; \
+			export NVM_DIR="$$HOME/.nvm"; \
+			[ -s "$$NVM_DIR/nvm.sh" ] && . "$$NVM_DIR/nvm.sh" || true; \
+			nvm install $(NODE_VERSION) || (echo "Please upgrade Node.js manually to 18+" && exit 1); \
+			nvm use $(NODE_VERSION) || true; \
+		fi; \
+		echo "✓ Node.js $$(node --version) and npm $$(npm --version) are installed"; \
+	fi
+
+ensure-playwright:  # Install Playwright browsers if needed
+	@echo "Checking Playwright browsers..."
+	@cd $(GAME_DIR) && npx playwright install --with-deps chromium 2>/dev/null || true
+	@echo "✓ Playwright browsers ready"
 
 game-install: ensure-node  ## Install game dependencies
 	@echo "Installing game dependencies..."
 	cd $(GAME_DIR) && npm install
+	@$(MAKE) ensure-playwright
 	@echo "✓ Game dependencies installed"
 
 game-dev: game-install  ## Run game in development mode

@@ -85,7 +85,29 @@ When you reach 100% connection energy:
 
 ## Development
 
-### Quick Start
+### Zero-Setup Quick Start (Recommended)
+
+On a **fresh dev machine** with no dependencies installed:
+
+```bash
+# From the repository root - this handles EVERYTHING automatically:
+make game
+
+# That's it! This will:
+# ✅ Auto-install Node.js 20 via nvm (if missing)
+# ✅ Auto-install all npm dependencies
+# ✅ Auto-install Playwright browsers
+# ✅ Start the dev server at http://localhost:3000
+```
+
+**Customize Node version** (default is 20):
+```bash
+make game NODE_VERSION=18  # Use Node.js 18 instead
+```
+
+### Manual Setup (Alternative)
+
+If you prefer manual control:
 
 ```bash
 # Install dependencies
@@ -111,7 +133,9 @@ npm run test:e2e     # Run E2E tests
 npm run test:e2e:ui  # Run E2E tests with UI
 ```
 
-### Using Make Commands
+### Make Commands (Auto-Install All Dependencies)
+
+All `make` commands automatically ensure Node.js and dependencies are installed:
 
 ```bash
 make game              # Run the game (starts dev server)
@@ -120,7 +144,7 @@ make game-lint         # Lint the code
 make game-test         # Run unit tests
 make game-test-e2e     # Run e2e tests
 make game-type-check   # Run type checking
-make game-check        # Run all quality checks
+make game-check        # Run all quality checks (lint + type-check + tests)
 make game-clean        # Clean build artifacts
 ```
 
