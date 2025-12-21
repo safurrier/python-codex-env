@@ -1,4 +1,4 @@
-.PHONY: compile-deps setup clean-pyc clean-test clean-venv clean test ty lint format check clean-example docs-install docs-build docs-serve docs-check docs-clean dev-env refresh-containers rebuild-images build-image push-image
+.PHONY: compile-deps setup clean-pyc clean-test clean-venv clean test ty lint format check clean-example docs-install docs-build docs-serve docs-check docs-clean game game-install game-dev game-build game-lint game-test game-test-e2e game-type-check game-check game-clean ensure-node ensure-playwright dev-env refresh-containers rebuild-images build-image push-image
 
 # Module name - will be updated by init script
 MODULE_NAME := src
@@ -220,6 +220,95 @@ docs-clean:  ## Clean documentation build files
 	rm -rf site/
 	rm -rf .cache/
 	@echo "Documentation cleaned"
+
+# Christmas Morning Game
+########################
+GAME_DIR := game
+GAME_PORT ?= 3000
+NODE_VERSION ?= 20
+
+ensure-node:  # Check if node/npm is installed, auto-install if missing
+	@if ! which node > /dev/null 2>&1; then \
+		echo "Node.js not found. Installing Node.js $(NODE_VERSION) via nvm..."; \
+		if [ ! -d "$$HOME/.nvm" ]; then \
+			echo "Installing nvm (Node Version Manager)..."; \
+			curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash; \
+			export NVM_DIR="$$HOME/.nvm"; \
+			[ -s "$$NVM_DIR/nvm.sh" ] && . "$$NVM_DIR/nvm.sh"; \
+		else \
+			export NVM_DIR="$$HOME/.nvm"; \
+			[ -s "$$NVM_DIR/nvm.sh" ] && . "$$NVM_DIR/nvm.sh"; \
+		fi; \
+		nvm install $(NODE_VERSION); \
+		nvm use $(NODE_VERSION); \
+		nvm alias default $(NODE_VERSION); \
+		echo "✅ Node.js $(NODE_VERSION) installed successfully"; \
+	else \
+		NODE_CURRENT=$$(node --version | cut -d'v' -f2 | cut -d'.' -f1); \
+		if [ $$NODE_CURRENT -lt 18 ]; then \
+			echo "⚠️  Node.js version $$NODE_CURRENT detected. Node 18+ required."; \
+			echo "Upgrading to Node.js $(NODE_VERSION)..."; \
+			export NVM_DIR="$$HOME/.nvm"; \
+			[ -s "$$NVM_DIR/nvm.sh" ] && . "$$NVM_DIR/nvm.sh" || true; \
+			nvm install $(NODE_VERSION) || (echo "Please upgrade Node.js manually to 18+" && exit 1); \
+			nvm use $(NODE_VERSION) || true; \
+		fi; \
+		echo "✓ Node.js $$(node --version) and npm $$(npm --version) are installed"; \
+	fi
+
+ensure-playwright:  # Install Playwright browsers if needed
+	@echo "Checking Playwright browsers..."
+	@cd $(GAME_DIR) && npx playwright install --with-deps chromium 2>/dev/null || true
+	@echo "✓ Playwright browsers ready"
+
+game-install: ensure-node  ## Install game dependencies
+	@echo "Installing game dependencies..."
+	cd $(GAME_DIR) && npm install
+	@$(MAKE) ensure-playwright
+	@echo "✓ Game dependencies installed"
+
+game-dev: game-install  ## Run game in development mode
+	@echo "Starting game development server..."
+	@echo "🎮 Game will be available at http://localhost:$(GAME_PORT)"
+	@echo "🎄 Building Christmas Morning..."
+	@echo ""
+	cd $(GAME_DIR) && npm run dev
+
+game-build: game-install  ## Build game for production
+	@echo "Building game for production..."
+	cd $(GAME_DIR) && npm run build
+	@echo "✓ Game built successfully"
+
+game-lint: game-install  ## Lint game code
+	@echo "Linting game code..."
+	cd $(GAME_DIR) && npm run lint
+	@echo "✓ Game linting complete"
+
+game-test: game-install  ## Run game unit tests
+	@echo "Running game unit tests..."
+	cd $(GAME_DIR) && npm run test
+	@echo "✓ Game unit tests complete"
+
+game-test-e2e: game-install  ## Run game e2e tests
+	@echo "Running game e2e tests..."
+	cd $(GAME_DIR) && npm run test:e2e
+	@echo "✓ Game e2e tests complete"
+
+game-type-check: game-install  ## Type check game code
+	@echo "Type checking game code..."
+	cd $(GAME_DIR) && npm run type-check
+	@echo "✓ Type checking complete"
+
+game-check: game-install game-lint game-type-check game-test game-test-e2e  ## Run all game quality checks
+	@echo "✓ All game quality checks passed"
+
+game-clean:  ## Clean game build artifacts
+	@echo "Cleaning game build artifacts..."
+	rm -rf $(GAME_DIR)/dist
+	rm -rf $(GAME_DIR)/node_modules
+	@echo "✓ Game cleaned"
+
+game: game-dev  ## Build and run the Christmas Morning game (alias for game-dev)
 
 # Project Management
 ##################

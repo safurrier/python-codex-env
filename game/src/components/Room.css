@@ -1,0 +1,210 @@
+.room {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: background 1s ease-in-out, filter 1s ease-in-out;
+  overflow: hidden;
+}
+
+.window {
+  position: absolute;
+  top: 50px;
+  right: 100px;
+  width: 300px;
+  height: 400px;
+  background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 100%);
+  border: 10px solid #8B4513;
+  border-radius: 10px;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.snow-outside {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="10" cy="10" r="2" fill="white" opacity="0.7"/><circle cx="30" cy="40" r="1.5" fill="white" opacity="0.6"/><circle cx="60" cy="20" r="2" fill="white" opacity="0.8"/><circle cx="80" cy="60" r="1" fill="white" opacity="0.5"/><circle cx="40" cy="80" r="1.5" fill="white" opacity="0.7"/><circle cx="70" cy="90" r="2" fill="white" opacity="0.6"/></svg>');
+  background-size: 100px 100px;
+  animation: snowfall 20s linear infinite;
+}
+
+@keyframes snowfall {
+  from { transform: translateY(-100px); }
+  to { transform: translateY(0px); }
+}
+
+.frost {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.3) 100%
+  );
+  background-size: 50px 50px;
+  transition: opacity 2s ease-in-out;
+  pointer-events: none;
+}
+
+.couch {
+  position: absolute;
+  bottom: 150px;
+  left: 100px;
+  width: 400px;
+  height: 150px;
+  background: linear-gradient(to bottom, #8B4513 0%, #654321 100%);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.couch::before {
+  content: '';
+  position: absolute;
+  top: -30px;
+  left: 20px;
+  width: 360px;
+  height: 80px;
+  background: linear-gradient(to bottom, #A0522D 0%, #8B4513 100%);
+  border-radius: 40px 40px 0 0;
+}
+
+.coffee-table {
+  position: absolute;
+  bottom: 100px;
+  left: 300px;
+  width: 250px;
+  height: 80px;
+  background: linear-gradient(to bottom, #DEB887 0%, #D2691E 100%);
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.armchair {
+  position: absolute;
+  bottom: 150px;
+  right: 200px;
+  width: 200px;
+  height: 150px;
+  background: linear-gradient(to bottom, #CD853F 0%, #A0522D 100%);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.armchair::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 10px;
+  width: 180px;
+  height: 60px;
+  background: linear-gradient(to bottom, #DEB887 0%, #CD853F 100%);
+  border-radius: 30px 30px 0 0;
+}
+
+.opening-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  font-style: italic;
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Mobile responsive design */
+@media (max-width: 768px) {
+  .window {
+    width: 200px;
+    height: 300px;
+    top: 30px;
+    right: 50px;
+  }
+
+  .couch {
+    bottom: 100px;
+    left: 50px;
+    width: 300px;
+    height: 120px;
+  }
+
+  .couch::before {
+    top: -25px;
+    width: 260px;
+    height: 60px;
+  }
+
+  .coffee-table {
+    bottom: 70px;
+    left: 180px;
+    width: 180px;
+    height: 60px;
+  }
+
+  .armchair {
+    bottom: 100px;
+    right: 120px;
+    width: 160px;
+    height: 120px;
+  }
+
+  .armchair::before {
+    top: -15px;
+    width: 140px;
+    height: 50px;
+  }
+
+  .opening-text {
+    font-size: 32px;
+    max-width: 80%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .window {
+    width: 150px;
+    height: 200px;
+    top: 20px;
+    right: 30px;
+  }
+
+  .couch {
+    bottom: 80px;
+    left: 30px;
+    width: 200px;
+    height: 80px;
+  }
+
+  .couch::before {
+    top: -20px;
+    width: 180px;
+    height: 40px;
+  }
+
+  .coffee-table {
+    bottom: 60px;
+    left: 120px;
+    width: 120px;
+    height: 40px;
+  }
+
+  .armchair {
+    bottom: 80px;
+    right: 80px;
+    width: 100px;
+    height: 80px;
+  }
+
+  .armchair::before {
+    top: -12px;
+    width: 90px;
+    height: 35px;
+  }
+
+  .opening-text {
+    font-size: 24px;
+  }
+}
