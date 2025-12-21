@@ -1,5 +1,15 @@
 import { test, expect } from '@playwright/test';
 
+// Helper function to open mobile palette if needed
+async function openPaletteIfMobile(page: any) {
+  const toggleBtn = page.locator('.palette-toggle-btn');
+  const isVisible = await toggleBtn.isVisible();
+  if (isVisible) {
+    await toggleBtn.click();
+    await page.waitForTimeout(300); // Wait for animation
+  }
+}
+
 test.describe('Christmas Morning Game - Complete Flow', () => {
   test('should display opening experience correctly', async ({ page }) => {
     await page.goto('/');
@@ -22,6 +32,7 @@ test.describe('Christmas Morning Game - Complete Flow', () => {
 
   test('should have item palette with all categories', async ({ page }) => {
     await page.goto('/');
+    await openPaletteIfMobile(page);
 
     // Check that the palette is visible
     await expect(page.locator('.item-palette')).toBeVisible();
@@ -40,6 +51,7 @@ test.describe('Christmas Morning Game - Complete Flow', () => {
 
   test('should allow expanding and collapsing categories', async ({ page }) => {
     await page.goto('/');
+    await openPaletteIfMobile(page);
 
     // People category should be expanded by default
     await expect(page.locator('.category-items').first()).toBeVisible();
@@ -69,6 +81,7 @@ test.describe('Christmas Morning Game - Complete Flow', () => {
 
   test('should show connection energy increasing', async ({ page }) => {
     await page.goto('/');
+    await openPaletteIfMobile(page);
 
     // Initial energy should be 0%
     await expect(page.locator('.energy-value')).toContainText('0%');
@@ -161,6 +174,7 @@ test.describe('Christmas Morning Game - Mobile Experience', () => {
 test.describe('Christmas Morning Game - Design Doc Compliance', () => {
   test('should have all required item categories', async ({ page }) => {
     await page.goto('/');
+    await openPaletteIfMobile(page);
 
     // Verify all 5 categories from design doc
     const requiredCategories = [
@@ -179,6 +193,7 @@ test.describe('Christmas Morning Game - Design Doc Compliance', () => {
 
   test('should show proper color-coded categories', async ({ page }) => {
     await page.goto('/');
+    await openPaletteIfMobile(page);
 
     // Open People category and check first item
     const peopleCategory = page.locator('.palette-category', { hasText: 'People' });
@@ -196,6 +211,7 @@ test.describe('Christmas Morning Game - Design Doc Compliance', () => {
 
   test('should have connection energy system', async ({ page }) => {
     await page.goto('/');
+    await openPaletteIfMobile(page);
 
     // Energy system components should all be present
     await expect(page.getByText('Connection Energy')).toBeVisible();
@@ -245,8 +261,9 @@ test.describe('Christmas Morning Game - Interaction Verification', () => {
     // Room should have proper dimensions for item placement
     const bounds = await room.boundingBox();
     expect(bounds).toBeTruthy();
-    expect(bounds!.width).toBeGreaterThan(500);
-    expect(bounds!.height).toBeGreaterThan(400);
+    // Dimensions should be reasonable for any viewport (mobile or desktop)
+    expect(bounds!.width).toBeGreaterThan(200);
+    expect(bounds!.height).toBeGreaterThan(200);
   });
 
   test('should have clickable items structure ready', async ({ page }) => {
