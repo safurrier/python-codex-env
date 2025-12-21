@@ -40,13 +40,22 @@ interface ItemPaletteProps {
 
 const ItemPalette: React.FC<ItemPaletteProps> = ({ connectionEnergy }) => {
   const [expandedCategory, setExpandedCategory] = useState<string | null>('People');
+  const [isOpen, setIsOpen] = useState(false);
 
   const toggleCategory = (categoryName: string) => {
     setExpandedCategory(expandedCategory === categoryName ? null : categoryName);
   };
 
+  const togglePalette = () => {
+    setIsOpen(!isOpen);
+  };
+
   return (
-    <div className="item-palette">
+    <>
+      <button className="palette-toggle-btn" onClick={togglePalette}>
+        {isOpen ? '✕ Close' : '🎄 Items'}
+      </button>
+      <div className={`item-palette ${isOpen ? 'open' : ''}`}>
       <div className="palette-header">
         <h2>Items</h2>
         <div className="energy-meter">
@@ -94,6 +103,7 @@ const ItemPalette: React.FC<ItemPaletteProps> = ({ connectionEnergy }) => {
         ))}
       </div>
     </div>
+    </>
   );
 };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
 import Room from './components/Room';
 import ItemPalette from './components/ItemPalette';
 import {
@@ -197,8 +198,12 @@ const App: React.FC = () => {
 
   const energyVisuals = energySystem.getEnergyVisuals(gameState.energyLevel);
 
+  // Use TouchBackend on touch devices, HTML5Backend on desktop
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  const backend = isTouchDevice ? TouchBackend : HTML5Backend;
+
   return (
-    <DndProvider backend={HTML5Backend}>
+    <DndProvider backend={backend}>
       <div className="app">
         <ItemPalette connectionEnergy={gameState.connectionEnergy} />
         <div className="room-container">

@@ -3,12 +3,41 @@
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  position: relative;
 }
 
 .room-container {
   flex: 1;
   margin-left: 300px;
   position: relative;
+}
+
+/* Mobile responsive design */
+@media (max-width: 768px) {
+  .app {
+    flex-direction: column;
+  }
+
+  .room-container {
+    margin-left: 0;
+    flex: 1;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .endgame-content {
+    padding: 20px;
+    max-width: 90%;
+  }
+
+  .endgame-content h1 {
+    font-size: 32px;
+  }
+
+  .endgame-content p {
+    font-size: 18px;
+  }
 }
 
 .endgame-message {

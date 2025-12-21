@@ -253,17 +253,22 @@ game-lint: game-install  ## Lint game code
 	cd $(GAME_DIR) && npm run lint
 	@echo "✓ Game linting complete"
 
-game-test: game-install  ## Run game tests
-	@echo "Running game tests..."
+game-test: game-install  ## Run game unit tests
+	@echo "Running game unit tests..."
 	cd $(GAME_DIR) && npm run test
-	@echo "✓ Game tests complete"
+	@echo "✓ Game unit tests complete"
+
+game-test-e2e: game-install  ## Run game e2e tests
+	@echo "Running game e2e tests..."
+	cd $(GAME_DIR) && npm run test:e2e
+	@echo "✓ Game e2e tests complete"
 
 game-type-check: game-install  ## Type check game code
 	@echo "Type checking game code..."
 	cd $(GAME_DIR) && npm run type-check
 	@echo "✓ Type checking complete"
 
-game-check: game-install game-lint game-type-check game-test  ## Run all game quality checks
+game-check: game-install game-lint game-type-check game-test game-test-e2e  ## Run all game quality checks
 	@echo "✓ All game quality checks passed"
 
 game-clean:  ## Clean game build artifacts

@@ -113,3 +113,98 @@
   font-style: italic;
   animation: float 4s ease-in-out infinite;
 }
+
+/* Mobile responsive design */
+@media (max-width: 768px) {
+  .window {
+    width: 200px;
+    height: 300px;
+    top: 30px;
+    right: 50px;
+  }
+
+  .couch {
+    bottom: 100px;
+    left: 50px;
+    width: 300px;
+    height: 120px;
+  }
+
+  .couch::before {
+    top: -25px;
+    width: 260px;
+    height: 60px;
+  }
+
+  .coffee-table {
+    bottom: 70px;
+    left: 180px;
+    width: 180px;
+    height: 60px;
+  }
+
+  .armchair {
+    bottom: 100px;
+    right: 120px;
+    width: 160px;
+    height: 120px;
+  }
+
+  .armchair::before {
+    top: -15px;
+    width: 140px;
+    height: 50px;
+  }
+
+  .opening-text {
+    font-size: 32px;
+    max-width: 80%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .window {
+    width: 150px;
+    height: 200px;
+    top: 20px;
+    right: 30px;
+  }
+
+  .couch {
+    bottom: 80px;
+    left: 30px;
+    width: 200px;
+    height: 80px;
+  }
+
+  .couch::before {
+    top: -20px;
+    width: 180px;
+    height: 40px;
+  }
+
+  .coffee-table {
+    bottom: 60px;
+    left: 120px;
+    width: 120px;
+    height: 40px;
+  }
+
+  .armchair {
+    bottom: 80px;
+    right: 80px;
+    width: 100px;
+    height: 80px;
+  }
+
+  .armchair::before {
+    top: -12px;
+    width: 90px;
+    height: 35px;
+  }
+
+  .opening-text {
+    font-size: 24px;
+  }
+}
