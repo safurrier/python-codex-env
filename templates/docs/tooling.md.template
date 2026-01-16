@@ -8,6 +8,12 @@ Summarize recommended tools, plugins, and export steps for your team.
 - Formatter/linter choices
 - Test frameworks
 
+### Suggested Installs
+
+- GUT: install via Godot AssetLib and enable in Project Settings → Plugins.
+- GDUnit4: install via Godot AssetLib and enable in Project Settings → Plugins.
+- gdformat / gdlint: `pip install godot-gdscript-toolkit`
+
 ## Export Steps
 
 1. Configure export presets
