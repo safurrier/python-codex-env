@@ -1,0 +1,31 @@
+# Godot Resources
+
+Use this page to collect helpful links for your team.
+
+## Official Docs
+
+- Godot Manual: https://docs.godotengine.org/en/stable/
+- Class Reference: https://docs.godotengine.org/en/stable/classes/
+- GDScript Basics: https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/
+- GDScript Style Guide: https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html
+- Input Map: https://docs.godotengine.org/en/stable/tutorials/inputs/inputevent.html
+
+## Learning Paths
+
+- 2D Game Tutorial: https://docs.godotengine.org/en/stable/getting_started/first_2d_game/
+- 3D Game Tutorial: https://docs.godotengine.org/en/stable/getting_started/first_3d_game/
+- Your First Script: https://docs.godotengine.org/en/stable/getting_started/step_by_step/scripting_first_script.html
+- Scene Instancing: https://docs.godotengine.org/en/stable/getting_started/step_by_step/instancing.html
+
+## Tooling & Testing
+
+- GUT: https://github.com/bitwes/Gut
+- GDUnit4: https://github.com/MikeSchulze/gdUnit4
+- gdformat / gdlint: https://github.com/Scony/godot-gdscript-toolkit
+
+## Team Checklists
+
+- [ ] Main scene configured
+- [ ] Input map updated
+- [ ] Export presets saved
+- [ ] Tooling documented
