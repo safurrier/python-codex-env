@@ -17,6 +17,15 @@ docker/.env
 .aider*
 CLAUDE.md
 
+# Godot project artifacts
+.godot/
+*.import
+*.uid
+*.tmp
+*.translation
+export_presets.cfg
+.import/
+
 # Documentation build artifacts
 site/
 .cache/

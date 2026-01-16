@@ -1,0 +1,15 @@
+# Tooling & Exports
+
+Summarize recommended tools, plugins, and export steps for your team.
+
+## Tooling
+
+- Godot editor version
+- Formatter/linter choices
+- Test frameworks
+
+## Export Steps
+
+1. Configure export presets
+2. Build release
+3. Verify output

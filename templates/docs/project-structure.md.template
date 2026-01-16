@@ -1,0 +1,13 @@
+# Project Structure
+
+Document how your team organizes scenes, scripts, and assets.
+
+```
+{project_name}/
+├── godot/
+│   ├── scenes/
+│   ├── scripts/
+│   ├── assets/
+│   └── addons/
+└── docs/
+```

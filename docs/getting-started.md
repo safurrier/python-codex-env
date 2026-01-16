@@ -1,143 +1,66 @@
-# Getting Started with Python Collab Template
+# Getting Started with Godot
 
-This guide walks you through using this template to create a new Python project.
+This guide assumes you have never used Godot before. We'll walk through installing the editor, opening the template project, and understanding the basics of scenes and nodes.
 
-## Prerequisites
+## 1. Install Godot
 
-- Python 3.9 or higher
-- Git
-- GitHub account (for template usage)
+1. Download **Godot 4.x** from the official site.
+2. Launch the editor.
+3. When prompted, install **Export Templates** (this enables builds for Windows/macOS/Linux/Web).
 
-## Creating a Project from This Template
+> Tip: Godot is portable. You can keep the editor in a folder next to your project if you want a fully self-contained setup.
 
-### Step 1: Create Repository from Template
+## 2. Open the Template Project
 
-1. Go to this template repository on GitHub
-2. Click **"Use this template"** button
-3. Choose **"Create a new repository"**
-4. Fill in your repository details:
-   - Repository name (e.g., `my-awesome-project`)
-   - Description
-   - Public/Private visibility
-
-### Step 2: Clone and Initialize
-
-1. Clone your new repository:
+1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/your-project-name.git
-   cd your-project-name
+   git clone https://github.com/your-username/your-godot-game.git
+   cd your-godot-game
    ```
+2. Open Godot.
+3. Click **Import** and choose the `godot/` folder.
+4. Godot will detect `project.godot` and import the project.
 
-2. Initialize your project:
-   ```bash
-   make init
-   ```
+## 3. Run the Sample Scene
 
-3. Follow the interactive prompts:
-   - **Project name**: Enter your project name (e.g., "My Awesome Project")
-   - **Description**: Brief description of your project
-   - **Author info**: Your name and email (auto-detected from git config)
-   - **Example code**: Choose how to handle example code:
-     - Keep (useful for reference)
-     - Minimal (basic working example)
-     - Remove (clean slate)
-   - **Documentation**: Set up MkDocs documentation (default: yes)
-   - **Pre-commit hooks**: Enable quality checks on commit (default: yes)
+1. In Godot, press **F5** (or click **▶ Play**).
+2. The first time you run, Godot may ask you to select a main scene.
+3. Choose `godot/scenes/Main.tscn`.
 
-### Step 3: Verify Setup
-
-After initialization, verify everything works:
-
-```bash
-# Run all quality checks
-make check
-
-# If you enabled documentation
-make docs-serve
+You should see a log message:
+```
+Godot starter pack loaded.
 ```
 
-## Project Structure After Initialization
+## 4. Godot Basics (Quick Orientation)
 
-Your initialized project will have:
+- **Scene**: A reusable collection of nodes saved as a `.tscn` file.
+- **Node**: A building block (Sprite, Camera, CharacterBody2D, etc.).
+- **Scene Tree**: The hierarchy of nodes in the current scene.
+- **Inspector**: The panel where you edit node properties.
+- **Script**: A GDScript file (`.gd`) attached to a node.
 
+### The Minimal Loop
+
+When a scene starts, Godot calls:
+- `_ready()` once when the node enters the scene tree
+- `_process(delta)` every frame for logic
+- `_physics_process(delta)` at a fixed timestep for physics
+
+## 5. Your First Change (Hello, Godot)
+
+Open `godot/scripts/Main.gd` and update the message:
+```gdscript
+extends Node2D
+
+func _ready() -> void:
+    print("Hello from my first Godot project!")
 ```
-your-project-name/
-├── your_project_name/          # Main package (renamed from src/)
-├── tests/                      # Test files
-├── docs/                       # Documentation (if enabled)
-├── .github/workflows/          # CI/CD workflows
-├── pyproject.toml             # Project configuration
-├── Makefile                   # Development commands
-└── README.md                  # Project documentation
-```
 
-## Development Workflow
+Run the project again to see the new message.
 
-### Daily Development
+## 6. Next Steps
 
-1. Make your changes to the code
-2. Add or update tests
-3. Run quality checks:
-   ```bash
-   make check
-   ```
-4. Update documentation if needed
-5. Commit and push
-
-### Available Commands
-
-Your project comes with these make targets:
-
-- `make setup` - Set up development environment
-- `make test` - Run tests with coverage
-- `make lint` - Run linting with auto-fix
-- `make format` - Format code
-- `make ty` - Run type checking
-- `make check` - Run all quality checks
-- `make docs-serve` - Serve documentation locally (if enabled)
-- `make docs-build` - Build documentation (if enabled)
-- `make docs-check` - Validate documentation build (if enabled)
-
-### Documentation (If Enabled)
-
-If you chose to set up documentation:
-
-1. **Local development**:
-   ```bash
-   make docs-serve
-   # Visit http://localhost:8000
-   ```
-
-2. **Content organization**:
-   - `docs/index.md` - Project homepage
-   - `docs/getting-started.md` - User guide
-   - `docs/reference/api.md` - Auto-generated API docs
-
-3. **GitHub Pages setup**:
-   - Go to repository Settings → Pages
-   - Set source to "GitHub Actions"
-   - Documentation will auto-deploy on main branch pushes
-
-### CI/CD
-
-Your project includes GitHub Actions workflows:
-
-- **Quality checks** (`tests.yml`): Runs on PRs and pushes
-- **Documentation** (`docs.yml`): Deploys docs to GitHub Pages (if enabled)
-
-## Next Steps
-
-1. **Update README.md** with project-specific information
-2. **Add your code** in the main package directory
-3. **Write tests** for your functionality
-4. **Update documentation** to describe your project
-5. **Set up GitHub Pages** (if documentation enabled)
-6. **Configure repository settings** (branch protection, etc.)
-
-## Tips
-
-- The template includes example code you can reference or remove
-- All configuration follows modern Python best practices
-- The documentation system auto-generates API docs from docstrings
-- Pre-commit hooks ensure code quality before commits
-- Use `make` commands for consistent development workflow
+- Continue to the **Starter Pack Tutorial** to build a playable scene.
+- Review **Project Structure** to understand how this template organizes files.
+- Explore **Tooling & Exports** to learn how to format scripts and ship builds.

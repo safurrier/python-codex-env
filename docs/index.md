@@ -1,67 +1,26 @@
-# Python Collab Template
+# Godot Game Template
 
-A modern, collaborative Python project template with comprehensive tooling and best practices built-in.
+Welcome to the Godot Game Template! This starter kit gives you a clean Godot project, an opinionated folder layout, and step-by-step documentation designed for beginners.
 
-## 🎯 Template Features
+## What You Get
 
-This template provides everything you need for a professional Python project:
+- ✅ **Ready-to-run Godot 4 project** in the `godot/` directory
+- ✅ **Starter scene + script** so you can press Play immediately
+- ✅ **Beginner tutorial** that introduces scenes, nodes, and GDScript
+- ✅ **Project structure guidance** to keep your game organized
+- ✅ **Tooling and export tips** so you can ship builds confidently
 
-- 🔧 **Modern Tooling**: UV package manager, Ruff formatting/linting, MyPy type checking
-- 🧪 **Testing**: pytest with coverage reporting and CI integration
-- 📚 **Documentation**: Optional MkDocs + Material theme with auto-generation
-- 🚀 **CI/CD**: GitHub Actions with quality checks and automated deployment
-- 🐳 **Development**: Docker support and pre-commit hooks
-- 📦 **Packaging**: Modern pyproject.toml configuration with hatchling
+## Quick Start (30 Seconds)
 
-## 🚀 Quick Start
+1. Install Godot 4.x.
+2. Import the `godot/` directory in the editor.
+3. Press **F5** to run the sample scene.
 
-### Using This Template
+## Where to Go Next
 
-1. **Create a new repository** from this template on GitHub
-2. **Clone your new repository**:
-   ```bash
-   git clone https://github.com/your-username/your-project-name.git
-   cd your-project-name
-   ```
-3. **Initialize your project**:
-   ```bash
-   make init
-   ```
-4. **Follow the prompts** to customize your project
+- 📘 **Getting Started**: install Godot, open the project, and learn the editor UI.
+- 🧰 **Starter Pack Tutorial**: build a tiny playable scene.
+- 🗂️ **Project Structure**: keep scenes, scripts, and assets tidy.
+- 🚀 **Tooling & Exports**: formatting, testing, and builds.
 
-### What `make init` Does
-
-The initialization script will:
-- Prompt for project name, description, and author information
-- Update all configuration files with your project details
-- Choose how to handle example code (keep, simplify, or remove)
-- Optionally set up MkDocs documentation (default: yes)
-- Rename directories and update imports
-- Set up git repository and pre-commit hooks
-
-## 📁 Template Structure
-
-```
-python-collab-template/
-├── src/                        # Source code (renamed during init)
-├── tests/                      # Test files
-├── scripts/                    # Utility scripts (including init)
-├── templates/                  # Documentation templates
-├── docker/                     # Docker configuration
-├── .github/workflows/          # CI/CD automation
-├── pyproject.toml             # Project configuration
-├── Makefile                   # Development commands
-└── README.md                  # Project documentation
-```
-
-## 🛠️ Available Commands
-
-After initialization, your project will have these commands:
-
-- `make setup` - Set up development environment
-- `make test` - Run tests with coverage
-- `make check` - Run all quality checks
-- `make docs-serve` - Serve documentation locally (if enabled)
-- `make docs-build` - Build documentation (if enabled)
-
-For complete usage instructions, see the [Getting Started](getting-started.md) guide.
+If you are brand new to Godot, start with **Getting Started** and move through the tutorial in order.
