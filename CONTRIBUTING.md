@@ -1,41 +1,32 @@
-# Contributing to Python Collab Template
+# Contributing to bq-util
 
-Thank you for your interest in contributing to this project!
+Thank you for your interest in improving `bq-util`!
 
 ## Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone git@github.com:your-username/python-collab-template.git`
-3. Create a new branch: `git checkout -b feature-name`
-4. Make your changes
-5. Run quality checks: `make check`
-6. Commit your changes: `git commit -m "Description of changes"`
-7. Push to your fork: `git push origin feature-name`
-8. Open a Pull Request
+2. Clone your fork: `git clone git@github.com:your-username/bq-util.git`
+3. Create a branch: `git checkout -b feature-name`
+4. Install dependencies: `make setup`
+5. Make your changes with accompanying tests and documentation updates
+6. Run the full quality suite: `make check`
+7. Commit: `git commit -m "Description of changes"`
+8. Push: `git push origin feature-name`
+9. Open a Pull Request
 
-## Development Setup
+## Development Guidelines
 
-```bash
-# Install dependencies and set up environment
-make setup
+- All code must be type annotated and pass `mypy`
+- Add or update tests for new functionality (`pytest` is required)
+- Keep documentation current with behavioural changes
+- Ensure `make check` succeeds before submitting a PR
 
-# Run all quality checks
-make check
-```
+## Pull Request Checklist
 
-## Code Quality Standards
-
-- All code must be typed with proper type hints
-- Tests must be included for new features
-- Documentation must be updated when necessary
-- All quality checks must pass (`make check`)
-
-## Pull Request Process
-
-1. Update the README.md with details of significant changes
-2. Update the CHANGELOG.md following the existing format
-3. The PR will be merged once you have the sign-off of at least one maintainer
+- [ ] Update `README.md` or docs when behaviour changes
+- [ ] Update `CHANGELOG.md`
+- [ ] Provide clear descriptions of user-facing changes
 
 ## Questions?
 
-Feel free to open an issue for any questions or concerns.
+Open an issue if anything is unclear or you need help getting started.

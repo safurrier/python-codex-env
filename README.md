@@ -1,138 +1,152 @@
-![Code Quality Checks](https://github.com/safurrier/python-collab-template/workflows/Code%20Quality%20Checks/badge.svg) [![codecov](https://codecov.io/gh/safurrier/python-collab-template/branch/master/graph/badge.svg)](https://codecov.io/gh/safurrier/python-collab-template)
+# bq-util
 
-# Python Project Template
+`bq-util` is a command line companion for Google BigQuery. It turns the
+original monolithic inspection script into a modular, Click-powered CLI for
+running queries, exploring recent jobs, and understanding how workloads spend
+slots.
 
-A modern Python project template with best practices for development and collaboration.
+![Tests](https://github.com/safurrier/python-codex-env/workflows/Code%20Quality%20Checks/badge.svg)
 
 ## Features
-- 🚀 Fast dependency management with [uv](https://github.com/astral-sh/uv)
-- ✨ Code formatting with [ruff](https://github.com/astral-sh/ruff)
-- 🔍 Type checking with [mypy](https://github.com/python/mypy)
-- 🧪 Testing with [pytest](https://github.com/pytest-dev/pytest)
-- 🐳 Docker support for development and deployment
-- 👷 CI/CD with GitHub Actions
 
-## Python Version
-This template requires Python 3.9 or higher and defaults to Python 3.12. To use a different version:
+- 🎯 **Project-aware execution** – discover projects from gcloud, remember your
+  preferred default, and switch on demand.
+- 📊 **Deep job analytics** – inspect execution plans, slot usage, and table
+  references from past jobs or freshly submitted ones.
+- 🧠 **Insightful summaries** – surface likely bottlenecks and optionally emit an
+  LLM-friendly JSON payload.
+- 🛠️ **Query runner** – execute SQL files, rewrite dbt `ref()` macros, preview
+  results, and export to CSV/JSON/Parquet.
+- 💾 **Stateful configuration** – persist default projects and the most recent
+  job for quick follow-up analysis.
+
+## Installation
+
+`bq-util` targets Python 3.9+. Install the CLI together with the Google Cloud
+extras:
 
 ```bash
-# List available Python versions
-uv python list
-
-# Use a specific version (e.g., 3.11)
-make setup PYTHON_VERSION=3.11  # or UV_PYTHON_VERSION=3.11 make setup
-
-# View installed Python versions
-uv python list --installed
+uv pip install -e .[cli]
+# or with pip
+git clone https://github.com/safurrier/python-codex-env.git
+cd python-codex-env
+pip install -e .[cli]
 ```
 
-uv will automatically download and manage Python versions as needed.
+The optional `cli` dependency group brings in `google-cloud-bigquery`,
+`google-cloud-bigquery-storage`, `pandas`, and other integrations required for
+query execution. The base package only depends on `click` and `rich`, so the
+CLI can still start up and explain which extras are missing.
 
-## Quickstart
+## Authenticating with BigQuery
+
+The CLI uses Application Default Credentials. Make sure the active account can
+access the relevant projects:
+
 ```bash
-# Clone this repo and change directory
-git clone git@github.com:safurrier/python-collab-template.git my-project-name
-cd my-project-name
+# Login once if you have not already
+gcloud auth application-default login
 
-# Initialize a new project
-make init
-
-# Follow the prompts to configure your project
+# Optionally set a default project for gcloud itself
+gcloud config set project my-analytics-project
 ```
 
-This will:
-- Configure project metadata (name, description, author)
-- Handle example code (keep, simplify, or remove)
-- Initialize a fresh git repository
-- Set up development environment
-- Configure pre-commit hooks (optional, enabled by default)
+You can override the project per command or persist a default inside the CLI.
 
-Pre-commit hooks will automatically run these checks before each commit:
-- Type checking (mypy)
-- Linting (ruff)
-- Formatting (ruff)
-- Tests (pytest)
+## Usage
 
-Alternatively, you can set up manually:
+### Configuration
+
+`bq-util` keeps its configuration in the XDG config directory (for most
+systems: `~/.config/bq_util/config.json`). Manage it with:
+
 ```bash
-# Install dependencies and set up the environment
+bq-util config --show
+bq-util config --set-project my-analytics-project
+bq-util config --reset
+```
+
+### Analysing jobs
+
+Analyse an existing job or interactively select one:
+
+```bash
+# Choose a project and job through interactive prompts
+bq-util analyze
+
+# Inspect a specific job (project:job syntax is supported)
+bq-util analyze analytics-project:job_abc123
+
+# Re-run analysis for the most recent job executed through the CLI
+bq-util analyze --last
+
+# Emit a JSON payload for tooling integrations
+bq-util analyze --last --format json
+```
+
+Verbose mode links the query plan to SQL fragments, while `--llm` produces a
+compact schema tailor-made for downstream processing.
+
+### Running queries
+
+Execute SQL from a file and review the results inline:
+
+```bash
+# Run a SQL file and view a results preview
+bq-util query path/to/query.sql --project analytics-project
+
+# Persist the project as default and immediately analyse the job
+bq-util query query.sql --set-default-project --analyze
+
+# Export results to Parquet
+bq-util query query.sql --output results.parquet
+```
+
+If the query contains dbt `ref()` macros the CLI rewrites them to fully
+qualified tables using the selected project.
+
+## Documentation
+
+Additional guides live under the `docs/` directory and are published with
+MkDocs. The key entry points are:
+
+- [Getting started](docs/getting-started.md) – installation, authentication, and
+  first-run walkthroughs.
+- [CLI guide](docs/bq-util.md) – detailed command reference with examples.
+- [API reference](docs/reference/api.md) – module documentation generated via
+  `mkdocstrings`.
+
+Serve the docs locally with:
+
+```bash
+make docs-serve
+```
+
+## Development
+
+We use [`uv`](https://github.com/astral-sh/uv) to manage virtual environments.
+Run the full suite of checks before submitting changes:
+
+```bash
 make setup
-
-# Run the suite of tests and checks
 make check
-
-# Optional: Remove example code to start fresh
-make clean-example
 ```
 
-## Development Commands
-
-### Quality Checks
-```bash
-make check      # Run all checks (test, mypy, lint, format)
-make test       # Run tests with coverage
-make mypy       # Run type checking
-make lint       # Run linter
-make format     # Run code formatter
-```
-
-### Example Code
-The repository includes a simple example showing:
-- Type hints
-- Dataclasses
-- Unit tests
-- Modern Python practices
-
-To remove the example code and start fresh:
-```bash
-make clean-example
-```
-## Container Support (Docker/Podman)
-
-### Development Environment
-
-The project automatically detects and uses either Docker or Podman:
+Individual commands are also available:
 
 ```bash
-make dev-env    # Uses podman if available, otherwise docker
-
-# Or explicitly choose:
-CONTAINER_ENGINE=docker make dev-env
-CONTAINER_ENGINE=podman make dev-env
-
-# Check which engine will be used:
-make container-info
-```
-
-This creates a container with:
-- All dependencies installed
-- Source code mounted (changes reflect immediately)
-- Development tools ready to use
-- Automatic UID/GID mapping for file permissions
-
-### Production Image
-```bash
-make build-image    # Build production image
-make push-image     # Push to container registry
-```
-
-## Project Structure
-```
-.
-├── src/                # Source code
-├── tests/             # Test files
-├── docker/            # Container configuration (Docker/Podman)
-├── .github/           # GitHub Actions workflows
-├── pyproject.toml     # Project configuration
-└── Makefile          # Development commands
+make test    # pytest with coverage
+make mypy    # strict type checking
+make lint    # Ruff linting
+make format  # Ruff formatting
 ```
 
 ## Contributing
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run `make check` to ensure all tests pass
-5. Submit a pull request
+
+Issues and pull requests are welcome! Please make sure tests and quality checks
+pass, and update documentation when behaviour changes. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for more details.
 
 ## License
-This project is licensed under the MIT License - see the LICENSE file for details.
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE).

@@ -1,143 +1,82 @@
-# Getting Started with Python Collab Template
+# Getting Started with bq-util
 
-This guide walks you through using this template to create a new Python project.
+This guide covers the essentials for installing `bq-util`, configuring access to
+Google BigQuery, and running your first commands.
 
 ## Prerequisites
 
-- Python 3.9 or higher
-- Git
-- GitHub account (for template usage)
+- Python 3.9 or later
+- `gcloud` CLI authenticated with Application Default Credentials
+- Access to the Google Cloud projects you plan to query
 
-## Creating a Project from This Template
+## Installation
 
-### Step 1: Create Repository from Template
-
-1. Go to this template repository on GitHub
-2. Click **"Use this template"** button
-3. Choose **"Create a new repository"**
-4. Fill in your repository details:
-   - Repository name (e.g., `my-awesome-project`)
-   - Description
-   - Public/Private visibility
-
-### Step 2: Clone and Initialize
-
-1. Clone your new repository:
-   ```bash
-   git clone https://github.com/your-username/your-project-name.git
-   cd your-project-name
-   ```
-
-2. Initialize your project:
-   ```bash
-   make init
-   ```
-
-3. Follow the interactive prompts:
-   - **Project name**: Enter your project name (e.g., "My Awesome Project")
-   - **Description**: Brief description of your project
-   - **Author info**: Your name and email (auto-detected from git config)
-   - **Example code**: Choose how to handle example code:
-     - Keep (useful for reference)
-     - Minimal (basic working example)
-     - Remove (clean slate)
-   - **Documentation**: Set up MkDocs documentation (default: yes)
-   - **Pre-commit hooks**: Enable quality checks on commit (default: yes)
-
-### Step 3: Verify Setup
-
-After initialization, verify everything works:
+Clone the repository and install the CLI with optional BigQuery dependencies:
 
 ```bash
-# Run all quality checks
-make check
-
-# If you enabled documentation
-make docs-serve
+git clone https://github.com/safurrier/python-codex-env.git
+cd python-codex-env
+uv pip install -e .[cli]
+# or: pip install -e .[cli]
 ```
 
-## Project Structure After Initialization
+If you prefer not to clone the repository, you can install directly from a Git
+URL:
 
-Your initialized project will have:
-
-```
-your-project-name/
-├── your_project_name/          # Main package (renamed from src/)
-├── tests/                      # Test files
-├── docs/                       # Documentation (if enabled)
-├── .github/workflows/          # CI/CD workflows
-├── pyproject.toml             # Project configuration
-├── Makefile                   # Development commands
-└── README.md                  # Project documentation
+```bash
+pip install 'bq-util @ git+https://github.com/safurrier/python-codex-env.git#egg=bq-util&subdirectory=.'
 ```
 
-## Development Workflow
+## Authenticate with Google Cloud
 
-### Daily Development
+`bq-util` relies on Application Default Credentials. If you have not already
+set them up, run:
 
-1. Make your changes to the code
-2. Add or update tests
-3. Run quality checks:
-   ```bash
-   make check
-   ```
-4. Update documentation if needed
-5. Commit and push
+```bash
+gcloud auth application-default login
+```
 
-### Available Commands
+You can optionally set a gcloud default project:
 
-Your project comes with these make targets:
+```bash
+gcloud config set project my-analytics-project
+```
 
-- `make setup` - Set up development environment
-- `make test` - Run tests with coverage
-- `make lint` - Run linting with auto-fix
-- `make format` - Format code
-- `make mypy` - Run type checking
-- `make check` - Run all quality checks
-- `make docs-serve` - Serve documentation locally (if enabled)
-- `make docs-build` - Build documentation (if enabled)
-- `make docs-check` - Validate documentation build (if enabled)
+## Configure the CLI
 
-### Documentation (If Enabled)
+The first time you run a command the CLI will look for a stored default project
+in `~/.config/bq_util/config.json`. Use the `config` command to inspect or
+update settings:
 
-If you chose to set up documentation:
+```bash
+# Show current configuration
+bq-util config --show
 
-1. **Local development**:
-   ```bash
-   make docs-serve
-   # Visit http://localhost:8000
-   ```
+# Persist a default project
+bq-util config --set-project my-analytics-project
+```
 
-2. **Content organization**:
-   - `docs/index.md` - Project homepage
-   - `docs/getting-started.md` - User guide
-   - `docs/reference/api.md` - Auto-generated API docs
+## Run a Query
 
-3. **GitHub Pages setup**:
-   - Go to repository Settings → Pages
-   - Set source to "GitHub Actions"
-   - Documentation will auto-deploy on main branch pushes
+Create a SQL file, then execute it with the CLI:
 
-### CI/CD
+```bash
+cat <<'SQL' > example.sql
+SELECT 'hello world' AS greeting
+SQL
 
-Your project includes GitHub Actions workflows:
+bq-util query example.sql --project my-analytics-project --analyze
+```
 
-- **Quality checks** (`tests.yml`): Runs on PRs and pushes
-- **Documentation** (`docs.yml`): Deploys docs to GitHub Pages (if enabled)
+The query command will execute the SQL, display key statistics, show a preview
+of the results, and optionally jump straight into the `analyze` workflow. The
+job ID is stored in the configuration file so you can revisit it with
+`bq-util analyze --last`.
 
 ## Next Steps
 
-1. **Update README.md** with project-specific information
-2. **Add your code** in the main package directory
-3. **Write tests** for your functionality
-4. **Update documentation** to describe your project
-5. **Set up GitHub Pages** (if documentation enabled)
-6. **Configure repository settings** (branch protection, etc.)
-
-## Tips
-
-- The template includes example code you can reference or remove
-- All configuration follows modern Python best practices
-- The documentation system auto-generates API docs from docstrings
-- Pre-commit hooks ensure code quality before commits
-- Use `make` commands for consistent development workflow
+- Explore the [BigQuery CLI guide](bq-util.md) for in-depth command
+  documentation and advanced flags.
+- Read the [container setup](container-setup.md) notes if you run the CLI from a
+  Docker or Podman environment.
+- Generate API docs with `make docs-build` to explore the Python modules.

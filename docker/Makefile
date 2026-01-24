@@ -33,7 +33,7 @@ check: test lint mypy
 
 # Docker
 ########
-IMAGE_NAME = container-registry.io/python-collab-template
+IMAGE_NAME = container-registry.io/bq-util
 IMAGE_TAG = latest
 
 dev-env: refresh-containers

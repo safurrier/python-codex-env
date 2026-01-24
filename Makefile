@@ -1,36 +1,29 @@
-.PHONY: compile-deps setup clean-pyc clean-test clean-venv clean test mypy lint format check clean-example docs-install docs-build docs-serve docs-check docs-clean dev-env refresh-containers rebuild-images build-image push-image
+.PHONY: compile-deps setup clean-pyc clean-test clean-venv clean test mypy lint format check docs-install docs-build docs-serve docs-check docs-clean dev-env refresh-containers rebuild-images build-image push-image ensure-container-ready container-info
 
-# Module name - will be updated by init script
-MODULE_NAME := src
-
-# Development Setup
-#################
-compile-deps:  # Compile dependencies from pyproject.toml
-	uv pip compile pyproject.toml -o requirements.txt
-	uv pip compile pyproject.toml --extra dev -o requirements-dev.txt
+PACKAGE_DIR := src/bq_util
+PACKAGE_IMPORT := bq_util
+TEST_PATH := tests
 
 PYTHON_VERSION ?= 3.12
+
+compile-deps:  # Compile dependencies from pyproject.toml
+	uv pip compile pyproject.toml -o requirements.txt
+	uv pip compile pyproject.toml --extra dev --constraint requirements.txt -o requirements-dev.txt
 
 ensure-uv:  # Install uv if not present
 	@which uv > /dev/null || (curl -LsSf https://astral.sh/uv/install.sh | sh)
 
-setup: ensure-uv compile-deps ensure-scripts  # Install dependencies
+setup: ensure-uv compile-deps  # Install dependencies
 	UV_PYTHON_VERSION=$(PYTHON_VERSION) uv venv
 	UV_PYTHON_VERSION=$(PYTHON_VERSION) uv pip sync requirements.txt requirements-dev.txt
 	$(MAKE) install-hooks
 
-install-hooks:  # Install pre-commit hooks if in a git repo with hooks configured
+install-hooks:  # Install pre-commit hooks if configured
 	@if [ -d .git ] && [ -f .pre-commit-config.yaml ]; then \
 		echo "Installing pre-commit hooks..."; \
 		uv run pre-commit install; \
 	fi
 
-ensure-scripts:  # Ensure scripts directory exists and files are executable
-	mkdir -p scripts
-	chmod +x scripts/*.py
-
-# Cleaning
-#########
 clean-pyc:  # Remove Python compilation artifacts
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +
@@ -46,24 +39,20 @@ clean-venv:  # Remove virtual environment
 
 clean: clean-pyc clean-test clean-venv
 
-# Testing and Quality Checks
-#########################
 test: setup  # Run pytest with coverage
-	uv run -m pytest tests --cov=$(MODULE_NAME) --cov-report=term-missing
+	uv run -m pytest $(TEST_PATH) --cov=$(PACKAGE_IMPORT) --cov-report=term-missing
 
 mypy: setup  # Run type checking
-	uv run -m mypy $(MODULE_NAME)
+	uv run -m mypy $(PACKAGE_DIR)
 
-lint: setup  # Run ruff linter with auto-fix
-	uv run -m ruff check --fix $(MODULE_NAME)
+lint: setup  # Run Ruff linting with auto-fix
+	uv run -m ruff check --fix $(PACKAGE_DIR) $(TEST_PATH)
 
-format: setup  # Run ruff formatter
-	uv run -m ruff format $(MODULE_NAME)
+format: setup  # Run Ruff formatter
+	uv run -m ruff format $(PACKAGE_DIR) $(TEST_PATH)
 
-check: setup lint format test mypy  # Run all quality checks
+check: setup format lint test mypy  # Run all quality checks
 
-# Documentation
-###############
 DOCS_PORT ?= 8000
 
 docs-install: setup  ## Install documentation dependencies
@@ -111,38 +100,19 @@ docs-clean:  ## Clean documentation build files
 	rm -rf .cache/
 	@echo "Documentation cleaned"
 
-# Project Management
-##################
-clean-example:  # Remove example code (use this to start your own project)
-	rm -rf $(MODULE_NAME)/example.py tests/test_example.py
-	touch $(MODULE_NAME)/__init__.py tests/__init__.py
-
-init: setup  # Initialize a new project
-	uv run python scripts/init_project.py
-
-# Container Engine Support
-########################
-# Auto-detect container engine (podman or docker)
+# Container Support
 CONTAINER_ENGINE ?= $(shell command -v podman >/dev/null 2>&1 && echo podman || echo docker)
 
-# Podman-specific adjustments
 ifeq ($(CONTAINER_ENGINE),podman)
-    # Use podman-compose for compose functionality
-    COMPOSE_CMD = podman-compose
-    # Use host UID/GID for rootless containers
-    CONTAINER_USER_OPTS = --userns=keep-id
-    # Podman machine status check
-    PODMAN_MACHINE_RUNNING = $(shell podman machine list --format json 2>/dev/null | grep '"Running": true' >/dev/null && echo yes || echo no)
+	COMPOSE_CMD = podman-compose
+	CONTAINER_USER_OPTS = --userns=keep-id
+	PODMAN_MACHINE_RUNNING = $(shell podman machine list --format json 2>/dev/null | grep '"Running": true' >/dev/null && echo yes || echo no)
 else
-    # Docker: use native compose
-    COMPOSE_CMD = $(CONTAINER_ENGINE) compose
-    # Docker: use current user's UID/GID to avoid permission issues
-    CONTAINER_USER_OPTS = --user $(shell id -u):$(shell id -g)
+	COMPOSE_CMD = $(CONTAINER_ENGINE) compose
+	CONTAINER_USER_OPTS = --user $(shell id -u):$(shell id -g)
 endif
 
-# Docker/Podman Images
-#####################
-IMAGE_NAME = container-registry.io/python-collab-template
+IMAGE_NAME = container-registry.io/bq-util
 IMAGE_TAG = latest
 
 dev-env: ensure-container-ready refresh-containers
@@ -169,8 +139,6 @@ push-image: build-image
 	@echo Pushing image to container registry using $(CONTAINER_ENGINE)
 	@$(CONTAINER_ENGINE) push ${IMAGE_NAME}:${IMAGE_TAG}
 
-# Container Engine Info
-######################
 ensure-container-ready:  # Ensure container engine is ready
 ifeq ($(CONTAINER_ENGINE),podman)
 	@echo "Checking Podman machine status..."

@@ -1,67 +1,43 @@
-# Python Collab Template
+# bq-util
 
-A modern, collaborative Python project template with comprehensive tooling and best practices built-in.
+Welcome to the documentation for `bq-util`, a Click-based command line
+application for exploring and executing Google BigQuery workloads. The tool
+wraps the BigQuery APIs with a workflow-friendly interface that remembers your
+favourite projects, inspects historical jobs, and runs SQL from disk.
 
-## 🎯 Template Features
+## Why bq-util?
 
-This template provides everything you need for a professional Python project:
+- **Accelerated troubleshooting** – fetch detailed query plans, slot
+  consumption, and bottleneck hints without visiting the Cloud Console.
+- **Scriptable workflows** – run queries from CI or local scripts, export
+  structured JSON, and chain to other tooling.
+- **Stateful ergonomics** – persist default projects and analyse the last job
+  you executed with a single flag.
 
-- 🔧 **Modern Tooling**: UV package manager, Ruff formatting/linting, MyPy type checking
-- 🧪 **Testing**: pytest with coverage reporting and CI integration
-- 📚 **Documentation**: Optional MkDocs + Material theme with auto-generation
-- 🚀 **CI/CD**: GitHub Actions with quality checks and automated deployment
-- 🐳 **Development**: Docker support and pre-commit hooks
-- 📦 **Packaging**: Modern pyproject.toml configuration with hatchling
+## Quick Start
 
-## 🚀 Quick Start
-
-### Using This Template
-
-1. **Create a new repository** from this template on GitHub
-2. **Clone your new repository**:
+1. Install the package with the CLI extras:
    ```bash
-   git clone https://github.com/your-username/your-project-name.git
-   cd your-project-name
+   uv pip install -e .[cli]
+   # or pip install -e .[cli]
    ```
-3. **Initialize your project**:
+2. Authenticate with Application Default Credentials if necessary:
    ```bash
-   make init
+   gcloud auth application-default login
    ```
-4. **Follow the prompts** to customize your project
+3. Inspect a recent job:
+   ```bash
+   bq-util analyze --last
+   ```
 
-### What `make init` Does
+## Command Overview
 
-The initialization script will:
-- Prompt for project name, description, and author information
-- Update all configuration files with your project details
-- Choose how to handle example code (keep, simplify, or remove)
-- Optionally set up MkDocs documentation (default: yes)
-- Rename directories and update imports
-- Set up git repository and pre-commit hooks
+- `bq-util config` – manage persisted defaults such as the preferred project and
+  location of the config file.
+- `bq-util analyze` – explore existing jobs, view execution plans, and emit
+  machine-readable summaries.
+- `bq-util query` – run SQL files, rewrite dbt `ref()` macros, preview results,
+  and optionally trigger job analysis immediately.
 
-## 📁 Template Structure
-
-```
-python-collab-template/
-├── src/                        # Source code (renamed during init)
-├── tests/                      # Test files
-├── scripts/                    # Utility scripts (including init)
-├── templates/                  # Documentation templates
-├── docker/                     # Docker configuration
-├── .github/workflows/          # CI/CD automation
-├── pyproject.toml             # Project configuration
-├── Makefile                   # Development commands
-└── README.md                  # Project documentation
-```
-
-## 🛠️ Available Commands
-
-After initialization, your project will have these commands:
-
-- `make setup` - Set up development environment
-- `make test` - Run tests with coverage
-- `make check` - Run all quality checks
-- `make docs-serve` - Serve documentation locally (if enabled)
-- `make docs-build` - Build documentation (if enabled)
-
-For complete usage instructions, see the [Getting Started](getting-started.md) guide.
+Dive deeper with the [Getting Started guide](getting-started.md) or jump
+straight to the [CLI walkthrough](bq-util.md) for detailed examples.

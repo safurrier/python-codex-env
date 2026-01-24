@@ -1,10 +1,10 @@
-site_name: Python Collab Template
-site_url: https://safurrier.github.io/python-collab-template/
-site_description: A collaborative Python project template with modern tooling
+site_name: bq-util
+site_url: https://safurrier.github.io/bq-util/
+site_description: Command line tooling for analysing and executing Google BigQuery jobs
 site_author: safurrier
 
-repo_name: safurrier/python-collab-template
-repo_url: https://github.com/safurrier/python-collab-template
+repo_name: safurrier/python-codex-env
+repo_url: https://github.com/safurrier/python-codex-env
 edit_uri: edit/main/docs/
 
 theme:
@@ -39,7 +39,7 @@ theme:
     text: Roboto
     code: Roboto Mono
   icon:
-    logo: material/library
+    logo: material/database
 
 plugins:
   - search
@@ -71,10 +71,11 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
+  - BigQuery CLI: bq-util.md
   - Reference:
-    - API Documentation: reference/api.md
+      - API Documentation: reference/api.md
 
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/safurrier/python-collab-template
+      link: https://github.com/safurrier/python-codex-env

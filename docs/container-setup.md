@@ -1,138 +1,75 @@
-# Container Setup Guide
+# Running bq-util in Containers
 
-This project supports both Docker and Podman for containerized development.
+`bq-util` ships with Docker and Podman configuration that mirrors the local
+setup experience. Use the provided `Makefile` targets to spin up a development
+shell inside a container if you prefer an isolated environment.
 
 ## Quick Start
 
-The Makefile automatically detects your container engine:
-
 ```bash
-# Automatic detection (prefers Podman if available)
+# Build images and start the development container
 make dev-env
-
-# Explicit engine selection
-CONTAINER_ENGINE=docker make dev-env
-CONTAINER_ENGINE=podman make dev-env
 ```
 
-## Podman vs Docker
+The target auto-detects whether Docker or Podman is available, preferring
+Podman when both exist.
 
-### Key Differences
+## Choosing an Engine
 
-| Feature | Docker | Podman |
-|---------|--------|--------|
-| Root privileges | Runs as root by default | Rootless by default |
-| Daemon | Requires dockerd daemon | Daemonless |
-| Security | Good with proper setup | Better default security |
-| Compose support | Native | Via podman-compose |
+| Scenario | Recommendation |
+|----------|----------------|
+| You already use Docker Desktop | Continue using Docker |
+| You need rootless containers or cannot run a daemon | Use Podman |
+| You work on Linux and want tighter security | Use Podman |
 
-### When to Use Which
+Both options mount the repository into `/workspace` within the container so the
+CLI and tests operate on your working copy.
 
-**Use Docker when:**
-- It's your team's standard
-- You need Docker Desktop features
-- You're using Docker-specific tooling
+## Authentication Inside Containers
 
-**Use Podman when:**
-- Security is a top priority
-- You can't/don't want to run a daemon
-- You're in a restricted environment
+The container does not include Google Cloud credentials. Authenticate using one
+of the following approaches:
+
+1. **Bind mount your ADC file**:
+   ```bash
+   docker run ... -v "$HOME/.config/gcloud/application_default_credentials.json:/root/.config/gcloud/application_default_credentials.json:ro"
+   ```
+2. **Use service account keys** by mounting the JSON file and exporting
+   `GOOGLE_APPLICATION_CREDENTIALS` before invoking `bq-util`.
 
 ## Troubleshooting
 
-### Permission Issues
+### Permission Errors on Mounted Volumes
 
-If you encounter permission issues with mounted volumes:
+Docker containers may need your host UID/GID to prevent root-owned files. The
+Makefile already applies these options, but if you launch containers manually
+set `--user $(id -u):$(id -g)`.
 
-1. **For Podman**: Should work automatically with rootless mode
-2. **For Docker**: Set your UID/GID in `docker/.env`:
-   ```bash
-   echo "UID=$(id -u)" >> docker/.env
-   echo "GID=$(id -g)" >> docker/.env
-   ```
+### Podman Compose
 
-### Socket Issues
-
-If Podman can't find the Docker socket:
+Podman users should install `podman-compose` to mirror Docker Compose behaviour:
 
 ```bash
-# Set the socket path in your .env
-echo "DOCKER_SOCK=${XDG_RUNTIME_DIR}/podman/podman.sock" >> docker/.env
-```
-
-### Compose Command Not Found
-
-For Podman, you need to install podman-compose:
-
-```bash
-# macOS
-brew install podman-compose
-
-# Linux
 pip install podman-compose
 ```
 
-### Podman Machine Not Running (macOS/Windows)
+### Podman Machine on macOS/Windows
 
-Podman needs a Linux VM to run containers. The Makefile will automatically start it, but you can also manage it manually:
+If Podman reports that no machine is running, initialise and start one:
 
 ```bash
-# Initialize a new machine
 podman machine init
-
-# Start the machine
 podman machine start
-
-# Check machine status
-podman machine list
-
-# Stop the machine
-podman machine stop
 ```
 
-### Auto-Setup with Make
+## Next Steps
 
-The project's Makefile handles most Podman setup automatically:
+After the container is running, use the standard workflow inside it:
 
-- Checks if Podman machine is running
-- Starts it if needed
-- Verifies podman-compose is installed
-- Uses appropriate socket paths
-
-Just run `make container-info` to see the current status.
-
-## Compatibility with Project Initialization
-
-The container setup is designed to work both before and after running `make init`:
-
-### Before `make init`
-- Source code is in `src/` directory
-- Container mounts entire project as `/workspace`
-- All development tools work normally
-
-### After `make init` 
-- Source code moves to your project module directory (e.g., `my_project/`)
-- Container setup continues to work unchanged
-- Volume mounts and dependencies remain intact
-
-The `make init` command:
-1. Renames `src/` to your project name
-2. Updates import statements in tests
-3. Modifies `pyproject.toml` and `Makefile`
-
-**The Docker/Podman setup survives this transformation** because:
-- The Dockerfile doesn't hardcode directory names
-- Dependencies are installed from temporary copied files
-- The entire project is mounted, regardless of internal structure
-
-This means you can:
 ```bash
-# Set up development environment
-make dev-env
-
-# Initialize your project later
-make init
-
-# Continue using the same development environment
-make dev-env  # Still works!
+make setup
+make check
+bq-util analyze --last
 ```
+
+The commands behave the same as on the host machine.
