@@ -7,7 +7,9 @@ authors = [
 ]
 requires-python = ">= 3.9"
 readme = "README.md"
-dependencies = []  # No runtime dependencies needed for example
+dependencies = [
+    "pyyaml>=6.0.2",
+]
 
 [project.optional-dependencies]
 dev = [
