@@ -7,7 +7,13 @@ authors = [
 ]
 requires-python = ">= 3.9"
 readme = "README.md"
-dependencies = []  # No runtime dependencies needed for example
+dependencies = [
+    "click>=8.1.7",
+    "pydantic>=2.8.0",
+    "requests>=2.32.3",
+    "tomli>=2.0.1",
+    "tomli-w>=1.0.0",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -31,7 +37,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src"]
+packages = ["src", "src/dread", "src/discord_reader"]
 
 [tool.ruff]
 line-length = 88
@@ -76,3 +82,14 @@ include = ["src"]
 
 [tool.ty.terminal]
 error-on-warning = true
+
+
+[project.scripts]
+dread = "dread.cli:cli"
+
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+markers = [
+  "e2e: contract tests against real Discord"
+]
