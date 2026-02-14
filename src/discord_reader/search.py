@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 
 from discord_reader.channels import list_guild_channels
 from discord_reader.client import DiscordAPIError, DiscordClient
 from discord_reader.messages import list_messages
 from discord_reader.models import MentionHit, Message
+
+SEARCH_UNAVAILABLE_CODES = ("403", "404", "405", "501")
 
 
 def _is_mention(message: Message, user_id: str) -> bool:
@@ -14,12 +16,10 @@ def _is_mention(message: Message, user_id: str) -> bool:
     return f"<@{user_id}>" in message.content or f"<@!{user_id}>" in message.content
 
 
-def _parse_since(*, since: str | None, last: int | None) -> datetime | None:
-    if since:
-        return datetime.fromisoformat(since.replace("Z", "+00:00"))
-    if last is None:
+def _parse_since(*, since: str | None) -> datetime | None:
+    if not since:
         return None
-    return datetime.now(tz=timezone.utc) - timedelta(days=last)
+    return datetime.fromisoformat(since.replace("Z", "+00:00"))
 
 
 def search_mentions(
@@ -32,24 +32,26 @@ def search_mentions(
     last: int | None = None,
     limit: int = 50,
 ) -> list[MentionHit]:
-    since_dt = _parse_since(since=since, last=last)
+    since_dt = _parse_since(since=since)
+    safe_limit = max(1, min(limit, 100))
+    scan_limit = max(safe_limit, min(last or safe_limit, 500))
+
     scopes = [channel_id] if channel_id else []
     if guild_id and not scopes:
         scopes = [c.id for c in list_guild_channels(client, guild_id)]
 
     hits: list[MentionHit] = []
+    search_path = None
     if channel_id:
         search_path = f"channels/{channel_id}/messages/search"
     elif guild_id:
         search_path = f"guilds/{guild_id}/messages/search"
-    else:
-        search_path = None
 
     if search_path:
         try:
             search_data = client.get(
                 search_path,
-                params={"mentions": user_id, "limit": limit},
+                params={"mentions": user_id, "limit": safe_limit},
                 allow_202_retry=True,
             )
             for group in search_data.get("messages", []):
@@ -58,20 +60,22 @@ def search_mentions(
                     if since_dt and msg.timestamp < since_dt:
                         continue
                     hits.append(MentionHit(channel_id=msg.channel_id, message=msg))
-            return hits
+            return hits[:safe_limit]
         except DiscordAPIError as exc:
-            if not any(code in str(exc) for code in ["403", "404", "501"]):
+            if not any(code in str(exc) for code in SEARCH_UNAVAILABLE_CODES):
                 raise
 
-    if not scopes and not channel_id and not guild_id:
-        raise DiscordAPIError("Mentions fallback requires --guild or --channel scope")
+    if not scopes:
+        raise DiscordAPIError(
+            "Mentions fallback requires --guild or --channel scope when search is unavailable"
+        )
 
     for scope_channel_id in scopes:
-        for msg in list_messages(client, scope_channel_id, limit=min(limit, 100)):
+        for msg in list_messages(client, scope_channel_id, limit=scan_limit):
             if since_dt and msg.timestamp < since_dt:
                 continue
             if _is_mention(msg, user_id):
                 hits.append(MentionHit(channel_id=scope_channel_id, message=msg))
-                if len(hits) >= limit:
+                if len(hits) >= safe_limit:
                     return hits
     return hits

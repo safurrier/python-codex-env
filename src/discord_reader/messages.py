@@ -4,6 +4,10 @@ from discord_reader.client import DiscordClient
 from discord_reader.models import Message
 
 
+def _clamp_limit(limit: int) -> int:
+    return max(1, min(limit, 100))
+
+
 def list_messages(
     client: DiscordClient,
     channel_id: str,
@@ -12,7 +16,7 @@ def list_messages(
     before: str | None = None,
     after: str | None = None,
 ) -> list[Message]:
-    params: dict[str, str | int] = {"limit": limit}
+    params: dict[str, str | int] = {"limit": _clamp_limit(limit)}
     if before:
         params["before"] = before
     if after:
@@ -26,7 +30,7 @@ def tail_messages(
 ) -> list[Message]:
     all_messages: list[Message] = []
     before: str | None = None
-    for _ in range(pages):
+    for _ in range(max(1, pages)):
         page = list_messages(client, channel_id, limit=limit, before=before)
         if not page:
             break

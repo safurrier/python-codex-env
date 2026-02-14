@@ -60,3 +60,18 @@ def test_mentions_requires_scope_for_fallback() -> None:
     client = DummyClient([DiscordAPIError("404")])
     with pytest.raises(DiscordAPIError):
         search_mentions(client, user_id="42")
+
+
+def test_mentions_fallback_uses_last_as_scan_window(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client = DummyClient([DiscordAPIError("501")])
+    captured: dict[str, int] = {}
+
+    def fake_list_messages(_client, _channel_id, limit):
+        captured["limit"] = limit
+        return []
+
+    monkeypatch.setattr("discord_reader.search.list_messages", fake_list_messages)
+    search_mentions(client, user_id="42", channel_id="10", limit=10, last=222)
+    assert captured["limit"] == 222

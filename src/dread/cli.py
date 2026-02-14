@@ -16,6 +16,35 @@ from discord_reader.search import search_mentions
 from dread.config import get_token, set_token
 from dread.formatting import message_preview, render_json
 
+CHANNEL_TYPE_ALIASES = {
+    "text": 0,
+    "dm": 1,
+    "voice": 2,
+    "group_dm": 3,
+    "category": 4,
+    "news": 5,
+    "news_thread": 10,
+    "public_thread": 11,
+    "private_thread": 12,
+    "stage": 13,
+    "forum": 15,
+    "media": 16,
+}
+
+
+def _resolve_channel_type(value: str | None) -> int | None:
+    if value is None:
+        return None
+    if value.isdigit():
+        return int(value)
+    lowered = value.lower()
+    if lowered not in CHANNEL_TYPE_ALIASES:
+        choices = ", ".join(sorted(CHANNEL_TYPE_ALIASES))
+        raise click.BadParameter(
+            f"Unknown channel type '{value}'. Use numeric type or one of: {choices}"
+        )
+    return CHANNEL_TYPE_ALIASES[lowered]
+
 
 @click.group()
 def cli() -> None:
@@ -73,12 +102,15 @@ def channel() -> None:
 
 @channel.command("ls")
 @click.argument("guild_id")
-@click.option("--type", "type_filter", type=int)
+@click.option(
+    "--type", "type_filter", type=str, help="Channel type name or numeric code"
+)
 @click.option("--json", "as_json", is_flag=True)
-def channel_ls(guild_id: str, type_filter: int | None, as_json: bool) -> None:
+def channel_ls(guild_id: str, type_filter: str | None, as_json: bool) -> None:
     channels = list_guild_channels(make_client(), guild_id)
-    if type_filter is not None:
-        channels = [c for c in channels if c.type == type_filter]
+    resolved_type = _resolve_channel_type(type_filter)
+    if resolved_type is not None:
+        channels = [c for c in channels if c.type == resolved_type]
     items = [c.model_dump() for c in channels]
     click.echo(
         render_json(items)
